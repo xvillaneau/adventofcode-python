@@ -39,5 +39,5 @@ def part_2(numbers):
 
 
 if __name__ == '__main__':
-    from libaoc import simple_main, static
-    simple_main(2019, 4, static((138241, 674034)), part_1, part_2)
+    from libaoc import simple_main, static_input
+    simple_main(2019, 4, static_input((138241, 674034)), part_1, part_2)

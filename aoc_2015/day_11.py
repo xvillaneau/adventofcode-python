@@ -69,5 +69,5 @@ def two_next_valid(password: str):
     return first, second
 
 if __name__ == '__main__':
-    from libaoc import static, tuple_main
-    tuple_main(2015, 11, static('cqjxjnds'), two_next_valid)
+    from libaoc import static_input, tuple_main
+    tuple_main(2015, 11, static_input('cqjxjnds'), two_next_valid)
