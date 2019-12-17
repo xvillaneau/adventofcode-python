@@ -10,6 +10,12 @@ State of the code by year:
 * **2018**: Incomplete. Some broken code.
 * **2019**: Ongoing.
 
+## Acknowledgements
+
+Huge shout-out to and infinite respect for Eric Wastl, the creator of Advent of Code and designer of all its puzzles. For having tried myself, creating good and fun programming puzzles requires _crazy_ amounts of effort. Being able to build two dozens of these every year, with randomized input data and a storyline, is nothing short of mind-blowing.
+
+Kudos to my colleagues too, off whom I like to bounce ideas.
+
 ## Disclaimer
 
 This is not good code. It is entirely undocumented, mostly untested, not guaranteed to be correct, and most certainly does not reflect any best practices outside formatting. I don't think my AoC solutions are particularly exotic, but that's subjective.
