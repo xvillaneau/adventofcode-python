@@ -1,180 +1,155 @@
-from collections import deque
-from functools import wraps, lru_cache
-from itertools import islice, tee, groupby
+"""
+Advent of Code 2015, day 10
+https://adventofcode.com/2015/day/10
+
+== The "Look and Say" sequence ==
+
+I solved it for fun ahead of AoC 2019, and was dragged into weeks of
+research on this problem alone. It's FASCINATING.
+
+The simplest approach to solving this is to write the Look-and-Say
+transformation, then apply it many times. Problem is: the length of its
+output grows exponentially! Consequently, a naive implementation might
+run 40 iterations without trouble but see its run time soar for 50
+iterations. And don't even think about doing 60 or 70.
+
+Maybe it's because I solved it in 2019, but part 2 (50 iterations) was
+not too difficult to brute-force with my laptop. I knew I could do
+better though. That's where John Conway's research comes in.
+
+This solution is based on two of his findings:
+ 1. The Splitting Theorem, which states that strings can be split in
+    such a way that both sides never interact ever again,
+ 2. The Chemical Theorem, which states that after enough iterations
+    (24 at most) ALL strings can eventually be expressed as compounds
+    of a finite set of 92 (+2) elements.
+
+With this, I designed a recursive cached solution that:
+ *  Computes the length of a string's descendents by splitting it
+    then recursively computing the length of each compound,
+ *  Caches enough of those results so that the recursion terminates
+    early under the correct conditions.
+
+This solution runs in roughly O(n.log(n)). Doing 50 iterations takes
+around 2 milliseconds on my machine. It can even calculate the length
+of the 10,000th term under a second. Try it out!
+"""
+from functools import lru_cache
+from itertools import islice
 import re
-from typing import List, Iterator
+from typing import List, Generator
 
-from hypothesis import given, assume, strategies as st
 
-# Basic computation of Look and Say
-RE_LNS = re.compile(r'(.)\1*')
-
-def imperative_look_and_say(string: str):
-    result, times = "", 1
-    repeat, *tail = string + " "
-    for char in tail:
+def look_and_say(string: str):
+    """
+    Simple implementation of look-and-say using a loop.
+    Interestingly, this is pretty much the fastest
+    implementation I could make; nothing else comes close.
+    """
+    result, times, repeat = "", 1, string[0]
+    for char in string[1:]:
         if char != repeat:
             result += str(times) + repeat
             times, repeat = 1, char
-            continue
-        times += 1
+        else:
+            times += 1
+    result += str(times) + repeat
     return result
 
-def _lns_replace(match):
-    return str(len(match.group())) + match.groups()[0]
-
-def regex_look_and_say(string: str):
-    return RE_LNS.sub(_lns_replace, string)
-
-def groupby_look_and_say(string: str):
-    return ''.join(
-        str(len(list(g))) + k
-        for k, g in groupby(string)
-    )
-
-look_and_say = imperative_look_and_say
 
 def naive_deep_look_and_say(string: str, depth: int):
     for _ in range(depth):
         string = look_and_say(string)
     return string
 
+
 # Splitting a sequence
-RE_ENDSPLIT = re.compile(r'[^2]22$')
+RE_ENDSPLIT = re.compile(r"[^2]22$")
 RE_SPLITS = [
-    re.compile(r'21([^1])(?!\1)'),
-    re.compile(r'2111[^1]'),
-    re.compile(r'23(?:$|([^3]){1,2}(?!\1))'),
-    re.compile(r'2([^123])(?!\1)'),
-    re.compile(r'[^123][123]'),
+    re.compile(r"21([^1])(?!\1)"),
+    re.compile(r"2111[^1]"),
+    re.compile(r"23(?:$|([^3]){1,2}(?!\1))"),
+    re.compile(r"2([^123])(?!\1)"),
+    re.compile(r"[^123][123]"),
 ]
 
+
 def split(string: str) -> List[str]:
+    """
+    Split a string, as described in Conway's Splitting Theorem.
+    IMPORTANT: DO NOT APPLY TO zero-day or one-day strings!
+    """
     return list(_split(string))
 
-def _split(string: str) -> str:
-    if string == '22':
-        yield string
-    elif RE_ENDSPLIT.search(string):
+
+def _split(string: str) -> Generator[str, None, None]:
+    """Internal recursive generator for splitting"""
+    if RE_ENDSPLIT.search(string):
         yield from _split(string[:-2])
-        yield '22'
+        yield "22"
     else:
         for regex in RE_SPLITS:
-            if match := regex.search(string):
+            match = regex.search(string)
+            if match:
                 p = match.start() + 1
                 yield from _split(string[:p])
                 yield from _split(string[p:])
                 return
+        # No matches
         yield string
 
-# Memoization code
-@lru_cache(maxsize=None)
-def memo_look_and_say(string: str) -> List[str]:
+
+@lru_cache(maxsize=128)
+def memoized_look_say_split(string: str) -> List[str]:
+    """
+    Runs look-and-say then splits the result. Also keeps it in
+    cache. Only 128 values are necessary since any sequence
+    eventually splits into patterns of 92 elements.
+    IMPORTANT: DO NOT APPLY TO zero-day strings!
+    """
     return split(look_and_say(string))
 
-# Main call, this one is much faster
-def deep_look_and_say(string: str, depth: int) -> List[str]:
+
+@lru_cache(maxsize=4096)
+def _recursive_lns_length(string: str, depth: int) -> int:
+    """
+    Main recursive routine. Thanks to the theory of look-and-say,
+    this terminates even if called for VERY large values. However
+    that requires calling the steps one-by-one in order.
+    """
     if depth <= 0:
-        return [string]
-    # IMPORTANT: Split can only be applied to 2+ day-old strings!
-    atoms = [look_and_say(string)]
-    for _ in range(depth-1):
-        next_atoms = []
-        for string in atoms:
-            next_atoms.extend(memo_look_and_say(string))
-        atoms = next_atoms
-    return atoms
+        return len(string)
+    res, n_depth = 0, depth - 1
+    for atom in memoized_look_say_split(string):
+        res += _recursive_lns_length(atom, n_depth)
+    return res
 
-def linked_look_and_say(string: str, depth: int):
-    assert depth >= 1
-    atoms = deque([look_and_say(string)])
-    for _ in range(depth-1):
-        steps = len(atoms)
-        for _ in range(steps):
-            atom = atoms.popleft()
-            atoms.extend(memo_look_and_say(atom))
-    return atoms
 
-def iter_look_and_say(string: str, depth: int, top=True):
-    if depth <= 0:
-        yield string
-    elif top:
-        yield from iter_look_and_say(
-            look_and_say(string), depth-1, False
-        )
-    else:
-        for atom in memo_look_and_say(string):
-            yield from iter_look_and_say(atom, depth-1, False)
-
-# Length-only optimization
-def parallel_iterator(generator_func):
-    roots = {}
-
-    @wraps(generator_func)
-    def inner(key, *args, **kwargs):
-        if key not in roots:
-            roots[key] = generator_func(key, *args, **kwargs)
-        iterator, roots[key] = tee(roots[key], 2)
-        return iterator
-
-    return inner
-
-@parallel_iterator
-def iter_lengths(string: str, at_top: bool = True) -> Iterator[int]:
+def iter_look_and_say_lengths(string: str) -> Generator[int, None, None]:
+    """
+    Iterate over the lengths of the consecutive look-and-say
+    applications, starting with the given string.
+    """
     yield len(string)
-    description = look_and_say(string)
-    atoms = [description] if at_top else split(description)
-    iterators = [iter_lengths(s, at_top=False) for s in atoms]
+    i, string = 0, look_and_say(string)
     while True:
-        yield sum(next(i) for i in iterators)
+        yield _recursive_lns_length(string, i)
+        i += 1
 
-def fast_length(string: str, depth: int) -> int:
-    return next(islice(iter_lengths(string), depth, None))
 
-# Tests
+def look_and_say_length(string: str, depth: int) -> int:
+    """Calculate the length of Look-and-Say at a given depth"""
+    return next(islice(iter_look_and_say_lengths(string), depth, None))
 
-def test_split():
-    assert split('22') == ['22']
-    assert split('1113122113') == ['1113122113']
-    assert split('311311222112') == ['311311222112']
-    assert split('1113213211') == ['11132', '13211']
-    assert split('121113223122') == ['12', '1113', '22', '31', '22']
-    assert split('312211322212221121123222112') == ['312211322212221121123222112']
-    assert split('31121123') == ['3112112', '3']
 
-def test_part_1():
-    assert look_and_say('1') == '11'
-    assert look_and_say('11') == '21'
-    assert look_and_say('21') == '1211'
-    assert look_and_say('1211') == '111221'
-    assert look_and_say('111221') == '312211'
-    assert deep_look_and_say('1', 5) == ['312211']
-    assert deep_look_and_say('3', 5) == ['1113122113']
-    assert deep_look_and_say('41111', 5) == ['11222112', '3114', '111221']
-    assert list(linked_look_and_say('3', 5)) == ['1113122113']
-    assert list(linked_look_and_say('41111', 5)) == ['11222112', '3114', '111221']
-    assert list(iter_look_and_say('41111', 5)) == ['11222112', '3114', '111221']
+def day_10(string: str):
+    """Yields the lengths at 40 and 50 steps"""
+    iterator = iter_look_and_say_lengths(string)
+    yield next(islice(iterator, 40, None))
+    yield next(islice(iterator, 9, None))
 
-RE_TEN = re.compile('(.)\1{9}')
 
-@given(st.text(alphabet='123456789'))
-def test_day_two_splitting_theorem(text):
-    assume(RE_TEN.search(text) is None)
-    assert naive_deep_look_and_say(text, 5) == ''.join(deep_look_and_say(text, 5))
+if __name__ == "__main__":
+    from libaoc import iter_main, static_input
 
-AOC_INPUT = '1113122113'
-
-if __name__ == '__main__':
-
-    def part_1(data: str):
-        return len(naive_deep_look_and_say(data, 40))
-        # return sum(map(len, deep_look_and_say(data, 40)))
-        # return fast_length(data, 40)
-
-    def part_2(data: str):
-        return len(naive_deep_look_and_say(data, 50))
-        # return sum(map(len, deep_look_and_say(data, 50)))
-        # return fast_length(data, 50)
-
-    from libaoc import simple_main, static_input
-    simple_main(2015, 10, static_input(AOC_INPUT), part_1, part_2)
+    iter_main(2015, 10, static_input("1113122113"), day_10)

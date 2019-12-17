@@ -20,6 +20,13 @@ Kudos to my colleagues too, off whom I like to bounce ideas.
 
 This is not good code. It is entirely undocumented, mostly untested, not guaranteed to be correct, and most certainly does not reflect any best practices outside formatting. I don't think my AoC solutions are particularly exotic, but that's subjective.
 
+## Best-Of
+
+There are a few exceptions however, here is a selection of solutions I am happy with:
+
+* [2015, day 15](aoc_2015/day_10.py): The Look-and-Say sequence
+* More to come maybe someday
+
 ## Requirements
 
 This code **requires Python 3.8** to run. Before you ask, yes I use the "Walrus" operator. No, I don't care if you hate it. And that's not the only 3.8 feature I use so deal with it.
