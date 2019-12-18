@@ -62,13 +62,29 @@ class Vect2D:
         return self + RIGHT
 
 
-UP, DOWN, LEFT, RIGHT = Vect2D(0, 1), Vect2D(0, -1), Vect2D(-1, 0), Vect2D(1, 0)
+ORIGIN = Vect2D(0, 0)
+UP, DOWN = Vect2D(0, 1), Vect2D(0, -1)
+LEFT, RIGHT = Vect2D(-1, 0), Vect2D(1, 0)
 
 class Direction(Enum):
-    Up = UP
-    Down = DOWN
     Left = LEFT
+    Up = UP
     Right = RIGHT
+    Down = DOWN
+
+    def __new__(cls, vector: Vect2D):
+        obj = object.__new__(cls)
+        obj._value_ = len(cls.__members__)
+        obj.vector = vector
+        return obj
+
+    @property
+    def left(self):
+        return Direction((self.value - 1) & 3)
+
+    @property
+    def right(self):
+        return Direction((self.value + 1) & 3)
 
 
 class Instruction(Enum):
@@ -84,25 +100,13 @@ class Walker2D:
         self.direction = direction
 
     def rot_left(self):
-        new_dirs = {
-            Direction.Up: Direction.Left,
-            Direction.Left: Direction.Down,
-            Direction.Down: Direction.Right,
-            Direction.Right: Direction.Up,
-        }
-        self.direction = new_dirs[self.direction]
+        self.direction = self.direction.left
 
     def rot_right(self):
-        new_dirs = {
-            Direction.Up: Direction.Right,
-            Direction.Left: Direction.Up,
-            Direction.Down: Direction.Left,
-            Direction.Right: Direction.Down,
-        }
-        self.direction = new_dirs[self.direction]
+        self.direction = self.direction.right
 
-    def move(self):
-        self.pos += self.direction.value
+    def move(self, n_steps: int = 1):
+        self.pos += self.direction.vector * n_steps
 
     def do(self, instruction: Instruction):
         if instruction == Instruction.Left:
@@ -111,3 +115,19 @@ class Walker2D:
             self.rot_right()
         elif instruction == Instruction.Move:
             self.move()
+
+
+@dataclass(frozen=True)
+class StaticWalker:
+    pos: Vect2D
+    direction: Direction
+
+    def rot_left(self):
+        return StaticWalker(self.pos, self.direction.left)
+
+    def rot_right(self):
+        return StaticWalker(self.pos, self.direction.right)
+
+    def move(self, n_step: int = 1):
+        move = self.direction.vector * n_step
+        return StaticWalker(self.pos + move, self.direction)
