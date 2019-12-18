@@ -1,5 +1,5 @@
 import pytest
-from aoc_2019.day_18 import day_18_part_1
+from aoc_2019.day_18 import day_18_part_1, day_18_part_2
 
 example_1 = """
 #########
@@ -106,3 +106,8 @@ FEWEST_STEPS_2 = [
     (example_8, 32),
     (example_9, 72),
 ]
+
+
+@pytest.mark.parametrize("data,steps", FEWEST_STEPS_2)
+def test_part_2(data, steps):
+    assert day_18_part_2(data) == steps
