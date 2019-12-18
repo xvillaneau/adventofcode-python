@@ -65,6 +65,8 @@ class Vect2D:
 ORIGIN = Vect2D(0, 0)
 UP, DOWN = Vect2D(0, 1), Vect2D(0, -1)
 LEFT, RIGHT = Vect2D(-1, 0), Vect2D(1, 0)
+UNIT_VECTORS = [UP, RIGHT, DOWN, LEFT]
+
 
 class Direction(Enum):
     Left = LEFT

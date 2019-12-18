@@ -8,7 +8,7 @@ V = TypeVar("V")
 class WeightedEdge:
     u: int
     v: int
-    weight: float
+    weight: int
 
     def __reversed__(self):
         return WeightedEdge(self.v, self.u, self.weight)
@@ -36,7 +36,7 @@ class WeightedGraph(Generic[V]):
     def edge_count(self) -> int:
         return sum(map(len, self._edges))
 
-    def add_edge(self, u: int, v: int, weight: float) -> None:
+    def add_edge(self, u: int, v: int, weight: int) -> None:
         edge = WeightedEdge(u, v, weight)
         self._edges[edge.u].append(edge)
         self._edges[edge.v].append(reversed(edge))
