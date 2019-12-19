@@ -7,43 +7,34 @@ import numpy as np
 
 from libaoc.files import read_full
 from libaoc.graph import WeightedGraph
+from libaoc.matrix import convolve_2d_3x3, load_string_matrix
 from libaoc.vectors import Vect2D, UNIT_VECTORS
 
 Graph = WeightedGraph[str]
 
-
-def load_maze(data: str):
-    return np.array([list(line) for line in data.strip().splitlines()])
-
-
-def count_neighbors(maze):
-    """Use convolution to detect intersections"""
-    pattern = np.array(([0, 1, 0], [1, 0, 1], [0, 1, 0]))
-
-    m = np.pad(maze, 1)
-    view_shape = tuple(np.subtract(m.shape, maze.shape) + 1) + maze.shape
-    strides = m.strides + m.strides
-    sub_matrices = np.lib.stride_tricks.as_strided(m, view_shape, strides)
-    filtered = np.einsum('ij,ijkl->kl', pattern, sub_matrices)
-
-    return np.where(maze, filtered, 0)
+PATTERN = np.array(([0, 1, 0], [1, 0, 1], [0, 1, 0]))
 
 
 def build_graphs(maze) -> List[Graph]:
+    """
+    Given the maze as a string, build a graph of the shortest distances
+    between the start and all doors/keys.
+
+    This function works in three steps:
+     1. Identify the tunnels, junctions and objects in the maze
+     2. Do a breadth-first walk through all the tunnels, and build a
+        graph of distances between all junctions and objects (one per
+        starting point; we assume the resulting graphs are distinct).
+     3. Use that graph to run a second BFS and build a new graph with
+        only the points of interest (start, keys, doors).
+    """
+    # Boolean map of th tunnels ("not walls")
     tunnels = maze != "#"
 
-    keys_map = np.where(tunnels, maze, ".") != "."
-    nodes_map = np.argwhere((count_neighbors(tunnels) > 2) | keys_map)
-    nodes = {Vect2D(*p) for p in nodes_map}
-
-    def successors(position: Vect2D):
-        return [
-            position + move
-            for move in UNIT_VECTORS
-            if tunnels[tuple(position + move)]
-        ]
-
-    distances = np.where(tunnels, 0, -10)
+    # Build a set of all vertices for a first graph: junctions and objects
+    objects_map = np.where(tunnels, maze, ".") != "."
+    junctions = np.where(tunnels, convolve_2d_3x3(tunnels, PATTERN), 0) > 2
+    nodes = {Vect2D(*p) for p in np.argwhere(junctions | objects_map)}
 
     def make_graph(origin: Vect2D) -> Graph:
 
@@ -69,7 +60,10 @@ def build_graphs(maze) -> List[Graph]:
                 frontier.appendleft((pos, pos, 0))
                 continue
 
-            for next_pos in successors(pos):
+            for move in UNIT_VECTORS:
+                next_pos = pos + move
+                if not tunnels[tuple(next_pos)]:
+                    continue
                 if next_pos not in nodes and next_pos in explored:
                     continue
                 pair = frozenset((pos, next_pos))
@@ -78,10 +72,14 @@ def build_graphs(maze) -> List[Graph]:
 
                 explored.add(next_pos)
                 frontier.append((next_pos, path_start, distance + 1))
-                if next_pos not in nodes:
-                    distances[tuple(next_pos)] = distance + 1
 
-        return graph
+        optimize = False
+        if not optimize:
+            return graph
+
+        # WIP
+        opt_graph = WeightedGraph(["@"])
+        return opt_graph
 
     return [make_graph(Vect2D(*p)) for p in np.argwhere(maze == "@")]
 
@@ -180,29 +178,23 @@ def solve_four_robots(graph_1: Graph, graph_2: Graph, graph_3: Graph, graph_4: G
             heappush(frontier, (new_distance, *state))
 
 
-FOUR_ROBOTS = load_maze("""
-@#@
-###
-@#@
-""")
-
-
 def insert_robots(maze):
+    robots = np.array([list("@#@"), list("###"), list("@#@")])
     x, y = np.argwhere(maze == "@")[0]
     new_maze = maze.copy()
-    new_maze[x-1:x+2, y-1:y+2] = FOUR_ROBOTS
+    new_maze[x-1:x+2, y-1:y+2] = robots
     return new_maze
 
 
 def day_18_part_1(data: str):
-    maze = load_maze(data)
+    maze = load_string_matrix(data)
     graphs = build_graphs(maze)
     assert len(graphs) == 1
     return find_shortest_path(graphs[0])
 
 
 def day_18_part_2(data: str):
-    maze = insert_robots(load_maze(data))
+    maze = insert_robots(load_string_matrix(data))
     graphs = build_graphs(maze)
     assert len(graphs) == 4
     return solve_four_robots(*graphs)
