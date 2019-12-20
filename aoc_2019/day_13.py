@@ -32,7 +32,7 @@ def part_1(code):
 
 
 def part_2(code):
-    runner = CodeRunner(code, debug=False)
+    runner = CodeRunner(code)
     runner.code[0] = 2
     score, ball_x, paddle_x = 0, 0, 0
     while True:

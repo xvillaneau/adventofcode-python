@@ -2,7 +2,7 @@ from collections.abc import Generator as GeneratorABC
 from functools import lru_cache
 from typing import Dict, Callable, List, Tuple
 
-from logging import getLogger, DEBUG, WARNING, StreamHandler
+from logging import getLogger, WARNING, StreamHandler
 
 
 class EndProgram(StopIteration):
@@ -19,14 +19,14 @@ class OutputInterrupt(IOError):
 
 class CodeRunner(GeneratorABC):
 
-    def __init__(self, code: List[int], *, name: str = None, debug=False):
+    def __init__(self, code: List[int], *, name: str = None, log_level=WARNING):
         self.code = code.copy()
         self.name = name or f"id:{id(self)}"
         self.pointer = 0
         self.relative_base = 0
 
         self.log = getLogger(f"intcode.{type(self).__name__}.{self.name}")
-        self.log.setLevel(DEBUG if debug else WARNING)
+        self.log.setLevel(log_level)
         self.log.addHandler(StreamHandler())
 
     def __iter__(self):

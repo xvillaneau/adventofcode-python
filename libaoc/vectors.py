@@ -27,6 +27,9 @@ class Vect2D:
     def __mul__(self, other: int):
         return type(self)(self.x * other, self.y * other)
 
+    def __rmul__(self, other: int):
+        return self * other
+
     def __add__(self, other: 'Vect2D'):
         return type(self)(self.x + other.x, self.y + other.y)
 
