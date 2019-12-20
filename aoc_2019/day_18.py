@@ -1,4 +1,3 @@
-from collections import deque
 from heapq import heappop, heappush
 from itertools import chain
 from typing import Dict, List, Set
@@ -6,11 +5,11 @@ from typing import Dict, List, Set
 import numpy as np
 
 from libaoc.files import read_full
-from libaoc.graph import WeightedGraph
-from libaoc.matrix import convolve_2d_3x3, load_string_matrix
+from libaoc.graph import HWeightedGraph, build_graph
+from libaoc.matrix import load_string_matrix
 from libaoc.vectors import Vect2D, UNIT_VECTORS
 
-Graph = WeightedGraph[str]
+Graph = HWeightedGraph[str]
 
 PATTERN = np.array(([0, 1, 0], [1, 0, 1], [0, 1, 0]))
 
@@ -33,111 +32,72 @@ def build_graphs(maze) -> List[Graph]:
 
     # Build a set of all vertices for a first graph: junctions and objects
     objects_map = np.where(tunnels, maze, ".") != "."
-    junctions = np.where(tunnels, convolve_2d_3x3(tunnels, PATTERN), 0) > 2
-    nodes = {Vect2D(*p) for p in np.argwhere(junctions | objects_map)}
+    nodes = {Vect2D(*p): maze[tuple(p)] for p in np.argwhere(objects_map)}
+
+    def successors(_pos: Vect2D):
+        for v in UNIT_VECTORS:
+            _new = _pos + v
+            if tunnels[tuple(_new)]:
+                yield _new, 1
 
     def make_graph(origin: Vect2D) -> Graph:
-
-        explored = {origin}
-        pairs_explored = set()
-        frontier = deque([(origin, origin, 0)])
-
-        graph = WeightedGraph(["@"])
-        node_ids: Dict[Vect2D, int] = {origin: 0}
-
-        while frontier:
-            pos, path_start, distance = frontier.popleft()
-
-            if pos != path_start and pos in nodes:
-
-                if pos not in node_ids:
-                    value = maze[tuple(pos)]
-                    vertex_name = value if value != "." else f"_{pos.x:02}_{pos.y:02}"
-                    node_ids[pos] = graph.add_vertex(vertex_name)
-
-                graph.add_edge(node_ids[pos], node_ids[path_start], distance)
-                pairs_explored.add(frozenset((pos, path_start)))
-                frontier.appendleft((pos, pos, 0))
-                continue
-
-            for move in UNIT_VECTORS:
-                next_pos = pos + move
-                if not tunnels[tuple(next_pos)]:
-                    continue
-                if next_pos not in nodes and next_pos in explored:
-                    continue
-                pair = frozenset((pos, next_pos))
-                if next_pos in nodes and pair in pairs_explored:
-                    continue
-
-                explored.add(next_pos)
-                frontier.append((next_pos, path_start, distance + 1))
-
-        optimize = False
-        if not optimize:
-            return graph
-
-        # WIP
-        opt_graph = WeightedGraph(["@"])
-        return opt_graph
+        return build_graph(
+            [origin],
+            nodes.__contains__,
+            nodes.__getitem__,
+            successors,
+        )
 
     return [make_graph(Vect2D(*p)) for p in np.argwhere(maze == "@")]
 
 
-def reachable_keys(graph: Graph, position: int, keys: Set[str]) -> Dict[int, int]:
+def reachable_keys(graph: Graph, position: str, keys: Set[str]) -> Dict[str, int]:
 
     reachable = {}
     explored = {position: 0}
-    frontier = [(position, 0)]
+    frontier = [(0, position)]
 
     while frontier:
-        vertex_id, distance = frontier.pop()
-        vertex = graph[vertex_id]
+        cost, vertex = frontier.pop()
 
         if vertex.isalpha() and vertex.lower() not in keys:
             if vertex.islower():
-                reachable[vertex_id] = distance
+                reachable[vertex] = cost
             continue
 
-        for edge in graph.edges_at(vertex_id):
-            next_id, next_dist = edge.v, distance + edge.weight
-            if next_id in explored and explored[next_id] <= next_dist:
+        for neighbor, distance in graph.neighbors_of(vertex):
+            next_cost = cost + distance
+            if neighbor in explored and explored[neighbor] <= next_cost:
                 continue
-            explored[next_id] = next_dist
-            frontier.append((next_id, next_dist))
+            explored[neighbor] = next_cost
+            frontier.append((next_cost, neighbor))
 
     return reachable
 
 
 def find_shortest_path(graph: Graph):
-    start_index = graph.index_of("@")
     all_keys = {name for name in graph if name.islower()}
 
-    frontier = [(0, [start_index], set())]
-    explored = {(start_index, frozenset()): 0}
+    frontier = [(0, ["@"], set())]
+    explored = {("@", frozenset()): 0}
 
     while frontier:
 
-        distance, path, keys = heappop(frontier)
+        cost, path, keys = heappop(frontier)
         if keys == all_keys:
-            return distance
+            return cost
 
-        for key_id, key_dist in reachable_keys(graph, path[-1], keys).items():
-            new_distance = distance + key_dist
-            new_keys = keys | {graph[key_id]}
-            state = key_id, frozenset(new_keys)
+        for key, distance in reachable_keys(graph, path[-1], keys).items():
+            new_distance = cost + distance
+            new_keys = keys | {key}
+            state = key, frozenset(new_keys)
             if state in explored and explored[state] <= new_distance:
                 continue
             explored[state] = new_distance
-            heappush(frontier, (new_distance, path + [key_id], new_keys))
+            heappush(frontier, (new_distance, path + [key], new_keys))
 
 
 def solve_four_robots(graph_1: Graph, graph_2: Graph, graph_3: Graph, graph_4: Graph):
-
-    start_1 = graph_1.index_of("@")
-    start_2 = graph_2.index_of("@")
-    start_3 = graph_3.index_of("@")
-    start_4 = graph_4.index_of("@")
 
     all_keys = {
         name
@@ -146,28 +106,29 @@ def solve_four_robots(graph_1: Graph, graph_2: Graph, graph_3: Graph, graph_4: G
         if name.islower()
     }
 
-    frontier = [(0, frozenset(), start_1, start_2, start_3, start_4)]
-    explored = {(frozenset(), start_1, start_2, start_3, start_4): 0}
+    init = (frozenset(), "@", "@", "@", "@")
+    frontier = [(0, init)]
+    explored = {init: 0}
 
     while frontier:
-        distance, keys, pos_1, pos_2, pos_3, pos_4 = heappop(frontier)
+        distance, (keys, pos_1, pos_2, pos_3, pos_4) = heappop(frontier)
         if keys == all_keys:
             return distance
 
         states_1 = (
-            ((keys | {graph_1[k1]}, k1, pos_2, pos_3, pos_4), distance + d1)
+            ((keys | {k1}, k1, pos_2, pos_3, pos_4), distance + d1)
             for k1, d1 in reachable_keys(graph_1, pos_1, keys).items()
         )
         states_2 = (
-            ((keys | {graph_2[k2]}, pos_1, k2, pos_3, pos_4), distance + d2)
+            ((keys | {k2}, pos_1, k2, pos_3, pos_4), distance + d2)
             for k2, d2 in reachable_keys(graph_2, pos_2, keys).items()
         )
         states_3 = (
-            ((keys | {graph_3[k3]}, pos_1, pos_2, k3, pos_4), distance + d3)
+            ((keys | {k3}, pos_1, pos_2, k3, pos_4), distance + d3)
             for k3, d3 in reachable_keys(graph_3, pos_3, keys).items()
         )
         states_4 = (
-            ((keys | {graph_4[k4]}, pos_1, pos_2, pos_3, k4), distance + d4)
+            ((keys | {k4}, pos_1, pos_2, pos_3, k4), distance + d4)
             for k4, d4 in reachable_keys(graph_4, pos_4, keys).items()
         )
 
@@ -175,7 +136,7 @@ def solve_four_robots(graph_1: Graph, graph_2: Graph, graph_3: Graph, graph_4: G
             if state in explored and explored[state] <= new_distance:
                 continue
             explored[state] = new_distance
-            heappush(frontier, (new_distance, *state))
+            heappush(frontier, (new_distance, state))
 
 
 def insert_robots(maze):

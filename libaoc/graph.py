@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from typing import TypeVar, Generic, List, Tuple
+from heapq import heappop, heappush
+from typing import TypeVar, Generic, List, Tuple, Callable, Iterable
 
 V = TypeVar("V")
 
@@ -65,7 +66,7 @@ class WeightedGraph(Generic[V]):
         return desc
 
 
-class HWeightedGraph(WeightedGraph):
+class HWeightedGraph(WeightedGraph, Generic[V]):
     """
     Convenient subset of weighted graph, where vertices are assumed to
     be hashable. This allows the indices to be abstracted at little cost.
@@ -102,3 +103,46 @@ class HWeightedGraph(WeightedGraph):
         for v in self._vx_dict:
             desc += f"{v!r} -> {self.neighbors_of(v)}\n"
         return desc
+
+
+T = TypeVar("T")
+
+
+def build_graph(
+    initial_nodes: List[T],
+    is_vertex: Callable[[T], bool],
+    as_vertex: Callable[[T], V],
+    successors: Callable[[T], Iterable[Tuple[T, int]]],
+) -> HWeightedGraph[V]:
+
+    assert all(is_vertex(init) for init in initial_nodes)
+    frontier = [(0, init, init) for init in initial_nodes]
+    nodes_explored = {(init, init): 0 for init in initial_nodes}
+    edges_explored = {}
+
+    graph = HWeightedGraph([as_vertex(init) for init in initial_nodes])
+
+    while frontier:
+        cost, start, current = heappop(frontier)
+
+        if is_vertex(current) and current != start:
+            if (vertex := as_vertex(current)) not in graph:
+                graph.add_vertex(vertex)
+                heappush(frontier, (0, current, current))
+            pair = frozenset((as_vertex(start), as_vertex(current)))
+            if pair not in edges_explored or edges_explored[pair] > cost:
+                edges_explored[pair] = cost
+            continue
+
+        for next_state, distance in successors(current):
+            next_cost = cost + distance
+            node = (start, next_state)
+            if node in nodes_explored and nodes_explored[node] <= next_cost:
+                continue
+            nodes_explored[node] = next_cost
+            heappush(frontier, (next_cost, start, next_state))
+
+    for (u, v), weight in edges_explored.items():
+        graph.add_edge(u, v, weight)
+
+    return graph

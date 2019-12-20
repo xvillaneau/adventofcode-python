@@ -52,6 +52,9 @@ class Vect2D:
     def __abs__(self):
         return abs(self.x) + abs(self.y)
 
+    def __lt__(self, other):
+        return self.x + self.y < other.x + other.y
+
     def up(self):
         return self + UP
 

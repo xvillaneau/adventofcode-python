@@ -1,11 +1,10 @@
-from collections import deque
 from heapq import heappush, heappop
 import re
 from typing import Dict, Iterator, Tuple
 
 import numpy as np
 
-from libaoc.graph import HWeightedGraph
+from libaoc.graph import HWeightedGraph, build_graph
 from libaoc.matrix import convolve_2d_3x3
 from libaoc.vectors import Vect2D, UP, LEFT, DOWN, RIGHT, UNIT_VECTORS
 
@@ -80,51 +79,21 @@ def model_paths(maze, portals: Dict[Portal, Vect2D]) -> HWeightedGraph:
     Generate a graph of the paths withing the maze between portals.
     This graph does NOT include travel inside the portals themselves!
     """
-    graph = HWeightedGraph(list(portals))
-
+    portals_by_pos = {pos: port for port, pos in portals.items()}
     sx, sy = maze.shape
 
     def successors(_pos: Vect2D):
         for v in UNIT_VECTORS:
             _new = _pos + v
             if 0 <= _new.x < sx and 0 <= _new.y < sy and maze[tuple(_new)]:
-                yield _new
+                yield _new, 1
 
-    pairs_explored = set()
-    portals_waiting = set(portals)
-    portals_by_pos = {pos: port for port, pos in portals.items()}
-
-    while portals_waiting:
-        start_portal = portals_waiting.pop()
-        start_pos = portals[start_portal]
-
-        found = []
-        frontier = deque([start_pos])
-        explored = {start_pos: 0}
-
-        while frontier:
-            position = frontier.popleft()
-
-            if position != start_pos and position in portals_by_pos:
-                new_portal = portals_by_pos[position]
-                if frozenset((start_portal, new_portal)) in pairs_explored:
-                    continue
-                graph.add_edge(start_portal, new_portal, explored[position])
-                pairs_explored.add(frozenset((start_portal, new_portal)))
-                found.append(new_portal)
-                continue
-
-            next_dist = explored[position] + 1
-            for next_pos in successors(position):
-                if next_pos in explored and explored[next_pos] <= next_dist:
-                    continue
-                explored[next_pos] = next_dist
-                frontier.append(next_pos)
-
-        if len(found) == 1:
-            portals_waiting.discard(found[0])
-
-    return graph
+    return build_graph(
+        list(portals_by_pos),
+        portals_by_pos.__contains__,
+        portals_by_pos.__getitem__,
+        successors,
+    )
 
 
 def shortest_path_simple(graph: HWeightedGraph):
