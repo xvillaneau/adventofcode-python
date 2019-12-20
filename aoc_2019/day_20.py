@@ -1,7 +1,7 @@
 from collections import deque
 from heapq import heappush, heappop
 import re
-from typing import Dict, Tuple
+from typing import Dict, Iterator, Tuple
 
 import numpy as np
 
@@ -10,6 +10,7 @@ from libaoc.matrix import convolve_2d_3x3
 from libaoc.vectors import Vect2D, UP, LEFT, DOWN, RIGHT, UNIT_VECTORS
 
 Portal = Tuple[str, bool]
+MultiPortal = Tuple[int, str, bool]
 
 
 def load_maze(data: str):
@@ -17,8 +18,6 @@ def load_maze(data: str):
     max_len = max(len(line) for line in lines)
     return np.array([list(f"{line:{max_len}}") for line in lines])
 
-
-RE_PORTAL = re.compile(r"([A-Z])[^A-Z]*([A-Z])")
 
 def find_portals(maze):
     walls = np.where(maze == ".", " ", maze) != " "
@@ -37,26 +36,36 @@ def find_portals(maze):
 
 
 def process_maze(maze):
+    """
+    Transform the maze input from its "raw" form to one that's easier
+    to process. To be more specific:
+     - Portal names and positions are extracted,
+     - The outer boundary (with the portal names) is removed
+     - The central hole (also portal names) is filled as a wall
+     - The string input is converted into a boolean map of paths.
+    """
+
     portals = find_portals(maze)
+    void = ~(maze == "#")
 
-    voids = ~(maze == "#")
-
+    # Shrink the maze on each side if needed
     offset = Vect2D(0, 0)
-    if np.all(voids[:2, :]):
+    if np.all(void[:2, :]):
         offset += Vect2D(-2, 0)
         maze = np.delete(maze, slice(None, 2), axis=0)
-    if np.all(voids[:, :2]):
+    if np.all(void[:, :2]):
         offset += Vect2D(0, -2)
         maze = np.delete(maze, slice(None, 2), axis=1)
-    if np.all(voids[-2:, :]):
+    if np.all(void[-2:, :]):
         maze = np.delete(maze, slice(-2, None), axis=0)
-    if np.all(voids[:, -2:]):
+    if np.all(void[:, -2:]):
         maze = np.delete(maze, slice(-2, None), axis=1)
 
+    # Fill in the center and turn the map into booleans
     donut = (maze == ".") | (maze == "#")
     maze = np.where(donut, maze, "#") == "."
-    sx, sy = maze.shape
 
+    sx, sy = maze.shape
     new_portals = {}
     for pos, name in portals:
         pos = pos + offset
@@ -67,15 +76,14 @@ def process_maze(maze):
 
 
 def model_paths(maze, portals: Dict[Portal, Vect2D]) -> HWeightedGraph:
-
-    graph = HWeightedGraph()
-
-    for (name, outer), _ in portals.items():
-        graph.add_vertex((name, outer))
-        if (name, not outer) in graph:
-            graph.add_edge((name, outer), (name, not outer), 1)
+    """
+    Generate a graph of the paths withing the maze between portals.
+    This graph does NOT include travel inside the portals themselves!
+    """
+    graph = HWeightedGraph(list(portals))
 
     sx, sy = maze.shape
+
     def successors(_pos: Vect2D):
         for v in UNIT_VECTORS:
             _new = _pos + v
@@ -119,18 +127,43 @@ def model_paths(maze, portals: Dict[Portal, Vect2D]) -> HWeightedGraph:
     return graph
 
 
-def shortest_path(graph: HWeightedGraph):
+def shortest_path_simple(graph: HWeightedGraph):
     start, end = ("AA", True), ("ZZ", True)
 
+    def portal_successors(p: Portal) -> Iterator[Tuple[Portal, int]]:
+        name, outer = p
+        if (name, not outer) in graph:
+            yield (name, not outer), 1
+        yield from graph.neighbors_of(p)
+
+    return _run_shortest_path(start, end, portal_successors)
+
+
+def shortest_path_recursive(graph: HWeightedGraph):
+    start, end = (0, "AA", True), (0, "ZZ", True)
+
+    def recursive_successors(p: MultiPortal) -> Iterator[Tuple[MultiPortal, int]]:
+        level, name, outer = p
+        if outer and level > 0 and name not in ("AA", "ZZ"):
+            yield (level - 1, name, False), 1
+        elif not outer:
+            yield (level + 1, name, True), 1
+        for (_n, _o), _d in graph.neighbors_of((name, outer)):
+            yield (level, _n, _o), _d
+
+    return _run_shortest_path(start, end, recursive_successors)
+
+
+def _run_shortest_path(start, end, successors):
     frontier = [(0, start)]
     explored = {start: 0}
 
     while frontier:
-        distance, portal = heappop(frontier)
-        if portal == end:
+        distance, state = heappop(frontier)
+        if state == end:
             return distance
 
-        for neighbor, dist in graph.neighbors_of(portal):
+        for neighbor, dist in successors(state):
             next_dist = distance + dist
             if neighbor in explored and explored[neighbor] <= next_dist:
                 continue
@@ -141,7 +174,8 @@ def shortest_path(graph: HWeightedGraph):
 def day_20(data: str):
     maze, portals = process_maze(load_maze(data))
     graph = model_paths(maze, portals)
-    yield shortest_path(graph)
+    yield shortest_path_simple(graph)
+    yield shortest_path_recursive(graph)
 
 
 if __name__ == '__main__':

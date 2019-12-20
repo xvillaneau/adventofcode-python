@@ -1,5 +1,11 @@
 import pytest
-from aoc_2019.day_20 import load_maze, process_maze, model_paths, shortest_path
+from aoc_2019.day_20 import (
+    load_maze,
+    process_maze,
+    model_paths,
+    shortest_path_simple,
+    shortest_path_recursive,
+)
 
 EXAMPLE_1 = """
          A
@@ -63,7 +69,54 @@ YN......#               VT..#....QG
            U   P   P
 """
 
+EXAMPLE_3 = """
+             Z L X W       C                 
+             Z P Q B       K                 
+  ###########.#.#.#.#######.###############  
+  #...#.......#.#.......#.#.......#.#.#...#  
+  ###.#.#.#.#.#.#.#.###.#.#.#######.#.#.###  
+  #.#...#.#.#...#.#.#...#...#...#.#.......#  
+  #.###.#######.###.###.#.###.###.#.#######  
+  #...#.......#.#...#...#.............#...#  
+  #.#########.#######.#.#######.#######.###  
+  #...#.#    F       R I       Z    #.#.#.#  
+  #.###.#    D       E C       H    #.#.#.#  
+  #.#...#                           #...#.#  
+  #.###.#                           #.###.#  
+  #.#....OA                       WB..#.#..ZH
+  #.###.#                           #.#.#.#  
+CJ......#                           #.....#  
+  #######                           #######  
+  #.#....CK                         #......IC
+  #.###.#                           #.###.#  
+  #.....#                           #...#.#  
+  ###.###                           #.#.#.#  
+XF....#.#                         RF..#.#.#  
+  #####.#                           #######  
+  #......CJ                       NM..#...#  
+  ###.#.#                           #.###.#  
+RE....#.#                           #......RF
+  ###.###        X   X       L      #.#.#.#  
+  #.....#        F   Q       P      #.#.#.#  
+  ###.###########.###.#######.#########.###  
+  #.....#...#.....#.......#...#.....#.#...#  
+  #####.#.###.#######.#######.###.###.#.#.#  
+  #.......#.......#.#.#.#.#...#...#...#.#.#  
+  #####.###.#####.#.#.#.#.###.###.#.###.###  
+  #.......#.....#.#...#...............#...#  
+  #############.#.#.###.###################  
+               A O F   N                     
+               A A D   M                     
+"""
+
+
 @pytest.mark.parametrize("data,shortest", [(EXAMPLE_1, 23), (EXAMPLE_2, 58)])
 def test_shortest_path(data, shortest):
     graph = model_paths(*process_maze(load_maze(data)))
-    assert shortest_path(graph) == shortest
+    assert shortest_path_simple(graph) == shortest
+
+
+@pytest.mark.parametrize("data,shortest", [(EXAMPLE_1, 26), (EXAMPLE_3, 396)])
+def test_shortest_recursive(data, shortest):
+    graph = model_paths(*process_maze(load_maze(data)))
+    assert shortest_path_recursive(graph) == shortest
