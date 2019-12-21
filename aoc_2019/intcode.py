@@ -1,8 +1,7 @@
 from collections.abc import Generator as GeneratorABC
 from functools import lru_cache
-from typing import Dict, Callable, List, Tuple
-
 from logging import getLogger, WARNING, StreamHandler
+from typing import Dict, Callable, List, Tuple
 
 
 class EndProgram(StopIteration):
@@ -15,6 +14,12 @@ class InputInterrupt(IOError):
 
 class OutputInterrupt(IOError):
     pass
+
+
+class NonAsciiOutput(IOError):
+    def __init__(self, data: int):
+        super().__init__(data)
+        self.data = data
 
 
 class CodeRunner(GeneratorABC):
@@ -219,6 +224,55 @@ class CodeRunner(GeneratorABC):
         action, modes = self._parse_code(self.code[self.pointer])
         args = self._get_args(modes)
         return action, args
+
+
+class ASCIIRunner(CodeRunner):
+
+    def goto_prompt(self):
+        lines = []
+        try:
+            while True:
+                lines.append(self.get_line())
+        except InputInterrupt:
+            return lines
+
+    def goto_output(self):
+        lines = []
+        try:
+            while True:
+                lines.append(self.get_line())
+        except NonAsciiOutput as out:
+            return out.data
+
+    def send_line(self, line: str):
+        for byte in line.encode() + b"\n":
+            self.send(byte)
+
+    def get_line(self):
+        line = ""
+        while (char := self.get_char()) != "\n":
+            line += char
+        return line
+
+    def get_char(self):
+        if (char := next(self)) > 127:
+            raise NonAsciiOutput(char)
+        return chr(char)
+
+    def program_run(self, program: List[str]):
+        self.goto_prompt()
+        for line in program:
+            self.send_line(line)
+        return self.goto_output()
+
+    def interactive_run(self):
+        while True:
+            try:
+                self._step()
+            except InputInterrupt:
+                self.send_line(input("> "))
+            except OutputInterrupt:
+                print(self.get_line())
 
 
 def read_program(year, day):
