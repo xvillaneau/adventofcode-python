@@ -23,7 +23,6 @@ class NonAsciiOutput(IOError):
 
 
 class CodeRunner(GeneratorABC):
-
     def __init__(self, code: List[int], *, name: str = None, log_level=WARNING):
         self.code = code.copy()
         self.name = name or f"id:{id(self)}"
@@ -87,7 +86,9 @@ class CodeRunner(GeneratorABC):
                 self.log.debug("Raising InputInterrupt")
                 raise InputInterrupt
 
-            self.log.debug("Running action %s%s", action.__name__, tuple(args + [input_value]))
+            self.log.debug(
+                "Running action %s%s", action.__name__, tuple(args + [input_value])
+            )
             action(self, *args, input_value)
             next_pointer, res = None, None
             self.log.info("Received input: %d", input_value)
@@ -227,7 +228,6 @@ class CodeRunner(GeneratorABC):
 
 
 class ASCIIRunner(CodeRunner):
-
     def goto_prompt(self):
         lines = []
         try:
@@ -277,4 +277,5 @@ class ASCIIRunner(CodeRunner):
 
 def read_program(year, day):
     from libaoc.files import read_full
-    return list(map(int, read_full(year, day).strip().split(',')))
+
+    return list(map(int, read_full(year, day).strip().split(",")))
