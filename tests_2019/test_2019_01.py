@@ -1,12 +1,12 @@
-from aoc_2019.day_01 import fuel_required, adjusted_fuel
+from aoc_2019.day_01 import fuel_iter
 
 def test_fuel_required():
-    assert fuel_required(12) == 2
-    assert fuel_required(14) == 2
-    assert fuel_required(1969) == 654
-    assert fuel_required(100756) == 33583
+    assert next(fuel_iter(12)) == 2
+    assert next(fuel_iter(14)) == 2
+    assert next(fuel_iter(1969)) == 654
+    assert next(fuel_iter(100756)) == 33583
 
 def test_adjusted_fuel():
-    assert adjusted_fuel(14) == 2
-    assert adjusted_fuel(1969) == 966
-    assert adjusted_fuel(100756) == 50346
+    assert sum(fuel_iter(14)) == 2
+    assert sum(fuel_iter(1969)) == 966
+    assert sum(fuel_iter(100756)) == 50346
