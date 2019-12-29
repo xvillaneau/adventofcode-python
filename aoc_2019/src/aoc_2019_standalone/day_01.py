@@ -1,3 +1,10 @@
+"""
+Advent of Code 2019, day 1, "Conventional" solution
+https://adventofcode.com/2019/day/1
+
+For a longer explanation of the problem and my solution, read:
+https://github.com/xvillaneau/adventofcode-python/wiki/AoC-2019-Day-1
+"""
 import sys
 
 
