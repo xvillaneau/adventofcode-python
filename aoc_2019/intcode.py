@@ -270,7 +270,7 @@ class ASCIIRunner(CodeRunner):
             try:
                 self._step()
             except InputInterrupt:
-                self.send_line(input("> "))
+                self.send_line(input())
             except OutputInterrupt:
                 print(self.get_line())
 
