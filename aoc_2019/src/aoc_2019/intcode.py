@@ -27,8 +27,6 @@ POSITION, IMMEDIATE, RELATIVE = 0, 1, 2
 
 
 class CodeRunner(GeneratorABC):
-    __slots__ = ("code", "name", "pointer", "base", "_in_queue", "_out_queue")
-
     def __init__(self, code: List[int], *, name: str = None):
         self.code = code.copy()
         self.name = name or f"id:{id(self)}"
