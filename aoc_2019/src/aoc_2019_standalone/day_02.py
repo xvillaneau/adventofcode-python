@@ -1,39 +1,46 @@
+"""
+Advent of Code 2019 day 2, "Conventional" solution
+https://adventofcode.com/2019/day/2
+
+For a longer explanation of the problem and my solution, read:
+https://github.com/xvillaneau/adventofcode-python/wiki/AoC-2019-Day-2
+"""
 import sys
 
 
-def run_computer(code, noun, verb):
+def run_computer(code):
     # The memory will be written to, and we don't want the input to be
     # affected by that. It would create some interesting bugs.
     memory = code.copy()
-    # Initialize the parameters in memory
-    memory[1], memory[2] = noun, verb
-
-    p = 0
+    pointer = 0
     while True:
-        op = memory[p]
-        if op == 99:  # Halt the program
-            return memory[0]
+        opcode = memory[pointer]
+        if opcode == 99:  # Halt the program
+            return memory
         # Read the arguments
-        a, b, c = memory[p + 1], memory[p + 2], memory[p + 3]
-        if op == 1:  # Addition
-            memory[c] = memory[a] + memory[b]
-        elif op == 2:  # Multiplication
-            memory[c] = memory[a] * memory[b]
+        arg_1, arg_2, arg_3 = memory[pointer + 1 : pointer + 4]
+        if opcode == 1:  # Addition
+            memory[arg_3] = memory[arg_1] + memory[arg_2]
+        elif opcode == 2:  # Multiplication
+            memory[arg_3] = memory[arg_1] * memory[arg_2]
         else:
-            raise RuntimeError(f"Unknown operation {op}")
-        # Move to the next instruction
-        p += 4
+            raise RuntimeError(f"Got unknown opcode {opcode}")
+        pointer += 4  # Move to the next instruction
 
 
-def locate_target(code, target):
+def gravity_assist(code, noun, verb):
+    code[1], code[2] = noun, verb
+    return run_computer(code)[0]
+
+
+def find_input_values(code, target):
     """Find which input returns the given target. The hard way."""
-    noun, verb = next(
-        (noun, verb)
+    return next(
+        noun * 100 + verb
         for noun in range(100)
         for verb in range(100)
-        if run_computer(code, noun, verb) == target
+        if gravity_assist(code, noun, verb) == target
     )
-    return noun * 100 + verb
 
 
 def parse_program(filename):
@@ -43,9 +50,9 @@ def parse_program(filename):
 
 def main(filename):
     code = parse_program(filename)
-    part_1 = run_computer(code, noun=12, verb=2)
+    part_1 = gravity_assist(code, noun=12, verb=2)
     print("Day 2, part 1:", part_1)
-    part_2 = locate_target(code, 19690720)
+    part_2 = find_input_values(code, 19690720)
     print("Day 2, part 2:", part_2)
 
 
