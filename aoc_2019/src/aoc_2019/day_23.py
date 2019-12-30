@@ -22,7 +22,7 @@ class Computer(CodeRunner):
         super().__init__(code, name=f"NIC_{address:02}")
         self.send(address)
 
-    def nic_step(self, computers: List['Computer']):
+    def nic_step(self, computers: List["Computer"]):
         try:
             self.run()
 

@@ -69,7 +69,7 @@ def edge_matrix(controller: DroneController, invert=False, size=50):
             if x < size:
                 edge_mat[x:, :] = True
             return edge_mat
-        edge_mat[x, :y + 1] = True
+        edge_mat[x, : y + 1] = True
 
 
 def detect_ray_surface(controller: DroneController, size=50):

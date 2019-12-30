@@ -31,6 +31,7 @@ EXAMPLE_2 = """
 ......##..
 """
 
+
 class FakeRunner:
     def __init__(self, matrix):
         self.mat = matrix
@@ -100,6 +101,7 @@ BIG_EXAMPLE = """
 ............................############
 .............................###########
 """
+
 
 def test_locate_square():
     beam_mat = load_string_matrix(BIG_EXAMPLE).transpose()

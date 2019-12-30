@@ -5,11 +5,14 @@ import numpy as np
 from libaoc import BaseRunner
 from libaoc.primes import extended_euclidian_algorithm
 
+
 def deal_new_stack(deck):
     return deck[::-1]
 
+
 def cut_stack(deck, n):
     return np.roll(deck, -n)
+
 
 def deal_with_increment(deck, n):
     r = len(deck)
@@ -17,6 +20,7 @@ def deal_with_increment(deck, n):
     rev_ind = (ind * n) % r
     np.put(ind, rev_ind, np.arange(r))
     return deck[ind]
+
 
 def parse_techniques(techniques):
     commands = []
@@ -31,6 +35,7 @@ def parse_techniques(techniques):
             raise ValueError(f"Bad line: {line}")
     return commands
 
+
 def follow_card(commands, card: int, deck_size):
     position = card
     for cmd, arg in commands:
@@ -41,6 +46,7 @@ def follow_card(commands, card: int, deck_size):
         else:  # incr
             position = (position * arg) % deck_size
     return position
+
 
 def revert_card(commands, position: int, deck_size):
     for cmd, arg in commands[::-1]:
@@ -53,12 +59,14 @@ def revert_card(commands, position: int, deck_size):
             position = (p * position) % deck_size
     return position
 
+
 def merge_commands(commands, deck_size):
     zero = follow_card(commands, 0, deck_size)
     one = follow_card(commands, 1, deck_size)
     offset = deck_size - zero
     increment = (one - zero) % deck_size
     return [(2, increment), (1, offset)]
+
 
 def merge_commands_n_times(commands, deck_size, n_steps: int):
     components = [merge_commands(commands, deck_size)]

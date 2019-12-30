@@ -1,5 +1,12 @@
 from itertools import islice
-from aoc_2019.day_10 import Field, Pt, analyze_asteroids, AocRunner, find_station, exterminate
+from aoc_2019.day_10 import (
+    Field,
+    Pt,
+    analyze_asteroids,
+    AocRunner,
+    find_station,
+    exterminate,
+)
 
 day_10 = AocRunner().run
 
@@ -73,12 +80,22 @@ example_5 = """
 ###.##.####.##.#..##
 """
 
+
 def test_load_asteroids():
     coords = {
-        (1, 0), (4, 0), (0, 2), (1, 2), (2, 2),
-        (3, 2), (4, 2), (4, 3), (3, 4), (4, 4),
+        (1, 0),
+        (4, 0),
+        (0, 2),
+        (1, 2),
+        (2, 2),
+        (3, 2),
+        (4, 2),
+        (4, 3),
+        (3, 4),
+        (4, 4),
     }
     assert Field.from_map(example_1) == (coords, 5, 5)
+
 
 def test_analyze():
     field = Field.from_map(example_1)
@@ -98,6 +115,7 @@ def test_analyze():
     for pt, sight in res.items():
         assert len(sight) == sight_counts[pt]
 
+
 def test_part_1():
     assert next(day_10(example_1)) == 8
     assert next(day_10(example_2)) == 33
@@ -105,16 +123,32 @@ def test_part_1():
     assert next(day_10(example_4)) == 41
     assert next(day_10(example_5)) == 210
 
+
 def test_points_sort():
     station = Pt(8, 3)
     destroyed = {
-        Pt(9, 0), Pt(10, 0), Pt(8, 1), Pt(9, 1), Pt(11, 1),
-        Pt(12, 1), Pt(15, 1), Pt(9, 2), Pt(11, 2),
+        Pt(9, 0),
+        Pt(10, 0),
+        Pt(8, 1),
+        Pt(9, 1),
+        Pt(11, 1),
+        Pt(12, 1),
+        Pt(15, 1),
+        Pt(9, 2),
+        Pt(11, 2),
     }
     assert sorted(destroyed, key=lambda p: p - station) == [
-        (8, 1), (9, 0), (9, 1), (10, 0), (9, 2),
-        (11, 1), (12, 1), (11, 2), (15, 1),
+        (8, 1),
+        (9, 0),
+        (9, 1),
+        (10, 0),
+        (9, 2),
+        (11, 1),
+        (12, 1),
+        (11, 2),
+        (15, 1),
     ]
+
 
 def test_vaporize():
     field = Field.from_map(example_5)
@@ -132,6 +166,7 @@ def test_vaporize():
     assert next(islice(vaporize_iter, 98, None)) == (9, 6)  # 199th
     assert next(vaporize_iter) == (8, 2)  # 200th
     assert next(vaporize_iter) == (10, 9)  # 201th
+
 
 def test_day_10():
     assert tuple(day_10(example_5)) == (210, 802)

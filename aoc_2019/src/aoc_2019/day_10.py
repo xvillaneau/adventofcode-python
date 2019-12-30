@@ -43,7 +43,7 @@ class Field(NamedTuple):
         rows = space_map.strip().splitlines()
         for y, row in enumerate(rows):
             for x, char in enumerate(row):
-                if char == '#':
+                if char == "#":
                     asteroids.add(Pt(x, y))
         return Field(asteroids, len(rows[0]), len(rows))
 

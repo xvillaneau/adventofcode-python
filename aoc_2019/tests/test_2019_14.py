@@ -1,5 +1,10 @@
 import pytest
-from aoc_2019.day_14 import AocRunner, most_fuel_produced, compute_required_ore, parse_data_as_matrices
+from aoc_2019.day_14 import (
+    AocRunner,
+    most_fuel_produced,
+    compute_required_ore,
+    parse_data_as_matrices,
+)
 
 day_14 = AocRunner().run
 
@@ -69,14 +74,15 @@ example_5 = """
 5 BHXH, 4 VRPVC => 5 LTCX
 """.strip().splitlines()
 
+
 @pytest.mark.parametrize(
-    "data",
-    [example_1, example_2, example_3, example_4, example_5],
+    "data", [example_1, example_2, example_3, example_4, example_5],
 )
 def test_most_fuel_produced(data):
     prod, cons = parse_data_as_matrices(data)
     min_ore = compute_required_ore(prod, cons)
     assert most_fuel_produced(prod, cons, n_ore=min_ore) == 1
+
 
 def test_day_14():
     assert next(day_14(example_1)) == 31

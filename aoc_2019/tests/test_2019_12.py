@@ -7,6 +7,7 @@ example = """
 <x=3, y=5, z=-1>
 """.strip().splitlines()
 
+
 def test_load():
     system = System.from_input(example)
 
@@ -18,6 +19,7 @@ def test_load():
     assert system[2].velocity == (0, 0, 0)
     assert system[3].pos == (3, 5, -1)
     assert system[3].velocity == (0, 0, 0)
+
 
 def test_step():
     system = System.from_input(example)
@@ -32,12 +34,14 @@ def test_step():
     assert system[3].pos == (2, 2, 0)
     assert system[3].velocity == (-1, -3, 1)
 
+
 example_2 = """
 <x=-8, y=-10, z=0>
 <x=5, y=5, z=10>
 <x=2, y=-7, z=3>
 <x=9, y=-8, z=-3>
 """.strip().splitlines()
+
 
 def test_part_1():
     assert part_1(example, 10) == 179

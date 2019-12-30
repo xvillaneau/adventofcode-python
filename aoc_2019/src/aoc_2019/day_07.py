@@ -15,11 +15,10 @@ def run_sequence(code: List[int], phase_settings: List[int]):
         signal = next(runner)
     return signal
 
+
 def max_signal(code: List[int], n_amp: int = 5):
-    return max(
-        run_sequence(code, settings)
-        for settings in permutations(range(n_amp))
-    )
+    return max(run_sequence(code, settings) for settings in permutations(range(n_amp)))
+
 
 def run_feedback(code: List[int], phase_settings: List[int]):
     amps = []
@@ -35,11 +34,9 @@ def run_feedback(code: List[int], phase_settings: List[int]):
         except StopIteration:
             return signal
 
+
 def max_feedback(code):
-    return max(
-        run_feedback(code, settings)
-        for settings in permutations(range(5, 10))
-    )
+    return max(run_feedback(code, settings) for settings in permutations(range(5, 10)))
 
 
 class AocRunner(BaseRunner):

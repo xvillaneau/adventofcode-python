@@ -77,10 +77,7 @@ def count_after_n_steps(start_bugs, steps):
     layers = {0: start_bugs}
     for _ in range(steps):
         layers = recursive_step_all(layers)
-    return sum(
-        np.sum(bugs)
-        for bugs in layers.values()
-    )
+    return sum(np.sum(bugs) for bugs in layers.values())
 
 
 class AocRunner(BaseRunner):

@@ -27,7 +27,7 @@ def find_portals(maze):
     for i, v in enumerate((RIGHT, UP, LEFT, DOWN)):
         coords = np.argwhere(convolve_2d_3x3(walls, np.rot90(pattern, i)) == 4)
         for x, y in coords:
-            label = ''.join(maze[x - 1:x + 2, y - 1:y + 2].reshape(9))
+            label = "".join(maze[x - 1 : x + 2, y - 1 : y + 2].reshape(9))
             label = re.sub(r"[\s#.]", "", label)
             pos = Vect2D(x, y) + v
             portals.append((pos, label))

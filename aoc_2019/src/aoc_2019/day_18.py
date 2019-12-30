@@ -41,12 +41,7 @@ def build_graphs(maze) -> List[Graph]:
                 yield _new, 1
 
     def make_graph(origin: Vect2D) -> Graph:
-        return build_graph(
-            [origin],
-            nodes.__contains__,
-            nodes.__getitem__,
-            successors,
-        )
+        return build_graph([origin], nodes.__contains__, nodes.__getitem__, successors,)
 
     return [make_graph(Vect2D(*p)) for p in np.argwhere(maze == "@")]
 
@@ -143,7 +138,7 @@ def insert_robots(maze):
     robots = np.array([list("@#@"), list("###"), list("@#@")])
     x, y = np.argwhere(maze == "@")[0]
     new_maze = maze.copy()
-    new_maze[x-1:x+2, y-1:y+2] = robots
+    new_maze[x - 1 : x + 2, y - 1 : y + 2] = robots
     return new_maze
 
 

@@ -7,8 +7,8 @@ from libaoc import BaseRunner
 @dataclass
 class Body:
     name: str
-    satellites: List['Body'] = field(default_factory=list)
-    center: Optional['Body'] = None
+    satellites: List["Body"] = field(default_factory=list)
+    center: Optional["Body"] = None
 
     def parents(self):
         res, p = [], self.center
@@ -19,7 +19,7 @@ class Body:
 
     def orbits(self, depth=1):
         return (
-            sum(sat.orbits(depth+1) for sat in self.satellites)
+            sum(sat.orbits(depth + 1) for sat in self.satellites)
             + len(self.satellites) * depth
         )
 
@@ -27,7 +27,7 @@ class Body:
 def parse_map(orbits_map: List[str]):
     bodies: Dict[str, Body] = {}
     for line in orbits_map:
-        left, right = line.split(')')
+        left, right = line.split(")")
         sun = bodies.setdefault(left, Body(left))
         planet = bodies.setdefault(right, Body(right))
         planet.center = sun
@@ -50,5 +50,5 @@ class AocRunner(BaseRunner):
 
     def run(self, data):
         bodies = parse_map(data)
-        yield bodies['COM'].orbits()
+        yield bodies["COM"].orbits()
         yield part_2(bodies)

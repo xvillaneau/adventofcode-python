@@ -26,7 +26,7 @@ def find_intersections(image):
     view_shape = tuple(np.subtract(m.shape, img.shape) + 1) + img.shape
     strides = m.strides + m.strides
     sub_matrices = np.lib.stride_tricks.as_strided(m, view_shape, strides)
-    filtered = np.einsum('ij,ijkl->kl', pattern, sub_matrices)
+    filtered = np.einsum("ij,ijkl->kl", pattern, sub_matrices)
 
     return np.where(img, filtered, 0)
 
@@ -53,7 +53,7 @@ def detect_segments(filtered_view):
         _map = np.full(_shape, -1, dtype=int)
         for i, seg in enumerate(_segments):
             row, start, stop = seg
-            _map[row, start:stop + 1] = i
+            _map[row, start : stop + 1] = i
         return _map
 
     horizontal = (filtered_view & 5) > 0
@@ -148,11 +148,11 @@ def detect_path(filtered_view, robot_start) -> List[str]:
 
 
 def split_path_pattern(path: List[str]):
-    path_string = ''.join(path)
+    path_string = "".join(path)
 
     def _match(string: str, patterns):
         while m := next((p for p in patterns if string.startswith(p)), ""):
-            string = string[len(m):]
+            string = string[len(m) :]
         return len(string) == 0
 
     def _try_patterns(string: str, can_create=2):
@@ -163,11 +163,11 @@ def split_path_pattern(path: List[str]):
                 yield (string[:n],)
             return
         for i in range(len(string)):
-            pat = string[:i+1]
+            pat = string[: i + 1]
             for sub_match in _try_patterns(string.replace(pat, ""), can_create - 1):
                 yield (pat,) + sub_match
 
-    re_split_nums = re.compile(r'[^\d]+|\d+')
+    re_split_nums = re.compile(r"[^\d]+|\d+")
 
     def _as_routine(pattern):
         return ",".join(re_split_nums.findall(pattern))
@@ -180,9 +180,7 @@ def split_path_pattern(path: List[str]):
         return all(len(_as_routine(p)) <= 20 for p in patterns)
 
     a, b, c = next(
-        p
-        for p in _try_patterns(path_string)
-        if _patterns_work(path_string, p)
+        p for p in _try_patterns(path_string) if _patterns_work(path_string, p)
     )
     main = path_string.replace(a, "A").replace(b, "B").replace(c, "C")
     return ",".join(main), _as_routine(a), _as_routine(b), _as_routine(c)

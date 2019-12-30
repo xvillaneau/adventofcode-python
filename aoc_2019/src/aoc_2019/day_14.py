@@ -10,6 +10,7 @@ from libaoc.algo import DFSearch
 
 ORE = 1_000_000_000_000
 
+
 def parse_data_as_matrices(data: List[str]):
     produced, consumed = {}, defaultdict(list)
     for line in data:
@@ -21,12 +22,10 @@ def parse_data_as_matrices(data: List[str]):
     intermediates.sort()
     names = ["ORE"] + intermediates + ["FUEL"]
 
-    _produced = np.array(
-        [produced.get(name, 0) for name in names], dtype=int
+    _produced = np.array([produced.get(name, 0) for name in names], dtype=int)
+    mat_produced = np.repeat(_produced[np.newaxis, :], len(names), axis=0) * np.eye(
+        len(names), dtype=int
     )
-    mat_produced = np.repeat(
-        _produced[np.newaxis, :], len(names), axis=0
-    ) * np.eye(len(names), dtype=int)
 
     _consumed = []
     for name_prod in names:
@@ -51,11 +50,11 @@ def next_steps_for_needed(prod, cons, inventory):
 
 def compute_required_ore(prod, cons, fuel=1):
     initial = (0,) * (len(prod) - 1) + (-fuel,)
+
     def complete(t):
         return all(n >= 0 for n in t[1:])
-    solver = DFSearch(
-        initial, complete, partial(next_steps_for_needed, prod, cons)
-    )
+
+    solver = DFSearch(initial, complete, partial(next_steps_for_needed, prod, cons))
     return -solver.search().state[0]
 
 
@@ -81,4 +80,3 @@ class AocRunner(BaseRunner):
         ore_for_1 = compute_required_ore(prod, cons)
         yield ore_for_1
         yield most_fuel_produced(prod, cons, fuel_ini=ORE // ore_for_1)
-

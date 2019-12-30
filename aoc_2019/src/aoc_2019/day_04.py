@@ -4,8 +4,8 @@ from typing import Tuple
 from libaoc import BaseRunner
 
 
-RE_PART_1 = re.compile(r'(.)\1')
-RE_PART_2 = re.compile(r'(.)(?<!\1.)\1(?!\1)')
+RE_PART_1 = re.compile(r"(.)\1")
+RE_PART_2 = re.compile(r"(.)(?<!\1.)\1(?!\1)")
 
 
 def acceptable_passwords(start: int, end: int, re_check):
@@ -17,7 +17,7 @@ def acceptable_passwords(start: int, end: int, re_check):
 
     def _rec_passwords(stack):
         if len(stack) == depth:
-            full_pw = ''.join(map(str, stack))
+            full_pw = "".join(map(str, stack))
             yield bool(re_check.search(full_pw))
             return
         prev = stack[-1] if stack else 0
@@ -40,7 +40,7 @@ class AocRunner(BaseRunner):
 
     @staticmethod
     def parser(data: str):
-        a, b = data.strip().split('-')
+        a, b = data.strip().split("-")
         return int(a), int(b)
 
     def run(self, data: Tuple[int, int]):
