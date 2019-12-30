@@ -198,7 +198,7 @@ class CodeRunner(GeneratorABC):
     def _get_action(self):
         p = self.pointer
         action, modes = self._parse_code(self.code[p])
-        args = self.code[p + 1:p + 1 + len(modes)]
+        args = self.code[p + 1 : p + 1 + len(modes)]
         return action, list(zip(args, modes))
 
 
