@@ -1,7 +1,7 @@
+from collections import deque
 from collections.abc import Generator as GeneratorABC
 from functools import lru_cache
-from logging import getLogger, WARNING, StreamHandler
-from typing import Dict, Callable, List, Tuple
+from typing import Callable, List, Tuple
 
 
 class EndProgram(StopIteration):
@@ -22,16 +22,25 @@ class NonAsciiOutput(IOError):
         self.data = data
 
 
+Argument = Tuple[int, int]
+POSITION, IMMEDIATE, RELATIVE = 0, 1, 2
+
+
 class CodeRunner(GeneratorABC):
-    def __init__(self, code: List[int], *, name: str = None, log_level=WARNING):
+    __slots__ = ("code", "name", "pointer", "base", "_in_queue", "_out_queue")
+
+    def __init__(self, code: List[int], *, name: str = None):
         self.code = code.copy()
         self.name = name or f"id:{id(self)}"
         self.pointer = 0
-        self.relative_base = 0
+        self.base = 0
 
-        self.log = getLogger(f"intcode.{type(self).__name__}.{self.name}")
-        self.log.setLevel(log_level)
-        self.log.addHandler(StreamHandler())
+        self._in_queue = deque()
+        self._out_queue = deque()
+
+        # self.log = getLogger(f"intcode.{type(self).__name__}.{self.name}")
+        # self.log.setLevel(log_level)
+        # self.log.addHandler(StreamHandler())
 
     def __iter__(self):
         return self
@@ -44,14 +53,16 @@ class CodeRunner(GeneratorABC):
     def copy(self, new_name: str = ""):
         runner = type(self)(self.code.copy(), name=new_name)
         runner.pointer = self.pointer
-        runner.relative_base = self.relative_base
+        runner.base = self.base
+        runner._out_queue = self._out_queue.copy()
+        runner._in_queue = self._in_queue.copy()
         return runner
 
     def throw(self, typ=None, val=None, tb=None):
-        raise NotImplementedError
+        pass
 
     def close(self):
-        raise NotImplementedError
+        pass
 
     def run_full(self):
         try:
@@ -60,16 +71,15 @@ class CodeRunner(GeneratorABC):
             return
 
     def __next__(self):
-        try:
-            self.run()
-        except OutputInterrupt:
-            return self._step(return_output=True)
+        if not self._out_queue:
+            try:
+                self.run()
+            except OutputInterrupt:
+                pass
+        return self._out_queue.popleft()
 
     def send(self, value: int):
-        try:
-            self.run()
-        except InputInterrupt:
-            self._step(input_value=value)
+        self._in_queue.append(value)
 
     # Actual code processing
 
@@ -77,125 +87,92 @@ class CodeRunner(GeneratorABC):
         while True:
             self._step()
 
-    def _step(self, *, return_output=False, input_value: int = None):
-        self.log.debug("At pointer=%d, code=%d", self.pointer, self.code[self.pointer])
+    def _step(self):
+        # self.log.debug("At pointer=%d, code=%d", self.pointer, self.code[self.pointer])
         action, args = self._get_action()
+        # self.log.debug("Running action %s%s", action.__name__, args)
 
-        if action is CodeRunner._io_input:
-            if input_value is None:
-                self.log.debug("Raising InputInterrupt")
-                raise InputInterrupt
-
-            self.log.debug(
-                "Running action %s%s", action.__name__, tuple(args + [input_value])
-            )
-            action(self, *args, input_value)
-            next_pointer, res = None, None
-            self.log.info("Received input: %d", input_value)
-
-        elif action is CodeRunner._io_output:
-            if not return_output:
-                self.log.debug("Raising OutputInterrupt")
-                raise OutputInterrupt
-
-            self.log.debug("Running action %s%s", action.__name__, tuple(args))
-            res = action(self, *args)
-            next_pointer = None
-            self.log.info("Sending output: %d", res)
-
-        else:
-            self.log.debug("Running action %s%s", action.__name__, tuple(args))
-            res = None
-            next_pointer = action(self, *args)
+        output_interrupt = action is CodeRunner._output
+        next_pointer = action(self, *args)
 
         if next_pointer is None:
             self.pointer += len(args) + 1
         else:
             self.pointer = next_pointer
 
-        return res
+        if output_interrupt:
+            raise OutputInterrupt
 
     # Instructions
 
-    def _add(self, a: int, b: int, c: int):
+    def _noop(self):
+        pass
+
+    def _add(self, a: Argument, b: Argument, c: Argument):
         self[c] = self[a] + self[b]
 
-    def _mul(self, a: int, b: int, c: int):
+    def _mul(self, a: Argument, b: Argument, c: Argument):
         self[c] = self[a] * self[b]
 
-    def _jump_if_true(self, test, dest):
+    def _jpt(self, test: Argument, dest: Argument):
         if self[test] != 0:
             return self[dest]
         return None
 
-    def _jump_if_false(self, test, dest):
+    def _jpf(self, test: Argument, dest: Argument):
         if self[test] == 0:
             return self[dest]
         return None
 
-    def _less_than(self, a, b, c):
+    def _lt(self, a: Argument, b: Argument, c: Argument):
         self[c] = int(self[a] < self[b])
 
-    def _equals(self, a, b, c):
+    def _eq(self, a: Argument, b: Argument, c: Argument):
         self[c] = int(self[a] == self[b])
 
     def _halt(self):
         raise EndProgram()
 
-    def _io_input(self, address: int, value: int):
-        self[address] = value
+    def _input(self, address: Argument):
+        if not self._in_queue:
+            raise InputInterrupt
+        # self.log.info("Received input: %d", value)
+        self[address] = self._in_queue.popleft()
 
-    def _io_output(self, a: int):
-        return self[a]
+    def _output(self, a: Argument):
+        # self.log.info("Sending output: %d", value)
+        self._out_queue.append(self[a])
 
-    def _set_relative_base(self, a: int):
-        self.relative_base += self[a]
+    def _rebase(self, a: Argument):
+        self.base += self[a]
 
-    CODES: Dict[int, Tuple[int, Callable]] = {
-        1: (3, _add),
-        2: (3, _mul),
-        3: (1, _io_input),
-        4: (1, _io_output),
-        5: (2, _jump_if_true),
-        6: (2, _jump_if_false),
-        7: (3, _less_than),
-        8: (3, _equals),
-        9: (1, _set_relative_base),
-        99: (0, _halt),
-    }
+    # Build the list of operations and their argument count. The index
+    # of each tuple is the op code of its action. Code 99 is processed
+    # separately. NOOP was added to fill in the gap for code #0.
+    CODES: List[Tuple[Callable, int]] = []
+    for _op in [_noop, _add, _mul, _input, _output, _jpt, _jpf, _lt, _eq, _rebase]:
+        CODES.append((_op, _op.__code__.co_argcount - 1))
 
     # Tools
 
-    class Address(int):
-        def __repr__(self):
-            return f"*{super().__repr__()}"
+    def __getitem__(self, item: Argument):
+        value, mode = item
+        if mode == IMMEDIATE:
+            return value
+        if mode == RELATIVE:
+            value += self.base
+        if value >= len(self.code):
+            return 0
+        if value < 0:
+            raise RuntimeError("Tried to read from negative address")
+        return self.code[value]
 
-    class Relative(int):
-        def __repr__(self):
-            return f"%{super().__repr__()}"
-
-    MODES_CLS = {
-        0: Address,
-        1: int,
-        2: Relative,
-    }
-
-    def __getitem__(self, item: int):
-        if isinstance(item, self.Relative):
-            item = self.Address(self.relative_base + item)
-        if isinstance(item, self.Address):
-            if item >= len(self.code):
-                return 0
-            if item < 0:
-                raise RuntimeError("Tried to read from negative address")
-            return self.code[item]
-        return item
-
-    def __setitem__(self, key: int, value: int):
-        if isinstance(key, self.Relative):
-            key = self.Address(self.relative_base + key)
-        if not isinstance(key, self.Address):
+    def __setitem__(self, key: Argument, value: int):
+        key, key_mode = key
+        if key_mode == IMMEDIATE:
             raise RuntimeError("Must provide an address to write to")
+        if key_mode == RELATIVE:
+            key += self.base
         if key < 0:
             raise RuntimeError("Tried to write to negative address")
         if key >= len(self.code):
@@ -203,28 +180,26 @@ class CodeRunner(GeneratorABC):
             self.code += [0] * diff
         self.code[key] = value
 
-    @classmethod
+    @staticmethod
     @lru_cache(maxsize=128)
-    def _parse_code(cls, code: int):
+    def _parse_code(code: int):
         code, op = divmod(code, 100)
-        n_args, action = cls.CODES[op]
+        if op == 99:
+            return CodeRunner._halt, []
+        action, n_args = CodeRunner.CODES[op]
+        if not code:
+            return action, [0] * n_args
         arg_modes = []
         for _ in range(n_args):
             code, mode = divmod(code, 10)
             arg_modes.append(mode)
         return action, arg_modes
 
-    def _get_args(self, modes: List[int]):
-        args = []
-        for i, mode in enumerate(modes):
-            value = self.code[self.pointer + i + 1]
-            args.append(self.MODES_CLS[mode](value))
-        return args
-
     def _get_action(self):
-        action, modes = self._parse_code(self.code[self.pointer])
-        args = self._get_args(modes)
-        return action, args
+        p = self.pointer
+        action, modes = self._parse_code(self.code[p])
+        args = self.code[p + 1:p + 1 + len(modes)]
+        return action, list(zip(args, modes))
 
 
 class ASCIIRunner(CodeRunner):
@@ -237,10 +212,9 @@ class ASCIIRunner(CodeRunner):
             return lines
 
     def goto_output(self):
-        lines = []
         try:
             while True:
-                lines.append(self.get_line())
+                self.get_line()
         except NonAsciiOutput as out:
             return out.data
 
