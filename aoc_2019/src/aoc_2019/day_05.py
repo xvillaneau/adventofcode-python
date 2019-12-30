@@ -1,4 +1,5 @@
-from aoc_2019.intcode import read_program, CodeRunner
+from libaoc import BaseRunner
+from .intcode import CodeRunner
 
 def run_diagnostic(code):
     runner = CodeRunner(code)
@@ -12,6 +13,12 @@ def run_thermals(code):
     runner.send(5)
     return next(runner)
 
-if __name__ == '__main__':
-    from libaoc import simple_main
-    simple_main(2019, 5, read_program, run_diagnostic, run_thermals)
+
+class AocRunner(BaseRunner):
+    year = 2019
+    day = 5
+    parser = BaseRunner.int_list_parser(",")
+
+    def run(self, data):
+        yield run_diagnostic(data)
+        yield run_thermals(data)

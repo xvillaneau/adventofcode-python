@@ -247,9 +247,3 @@ class ASCIIRunner(CodeRunner):
                 self.send_line(input())
             except OutputInterrupt:
                 print(self.get_line())
-
-
-def read_program(year, day):
-    from libaoc.files import read_full
-
-    return list(map(int, read_full(year, day).strip().split(",")))

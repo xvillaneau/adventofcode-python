@@ -1,6 +1,9 @@
 from typing import NamedTuple, List, Iterator, Dict
 from more_itertools import seekable
 
+from libaoc import BaseRunner
+
+
 class Point(NamedTuple):
     x: int
     y: int
@@ -41,21 +44,19 @@ def steps(instructions: List[str]) -> Dict[Point, int]:
 def intersections(wire_1: List[str], wire_2: List[str]):
     return set(path(wire_1)) & set(path(wire_2))
 
-def part_1(lines: List[str]):
-    l1, l2 = lines
-    w1, w2 = l1.split(','), l2.split(',')
-    return min(map(abs, intersections(w1, w2)))
 
-def part_2(lines: List[str]):
-    l1, l2 = lines
-    w1, w2 = l1.split(','), l2.split(',')
-    steps1, steps2 = steps(w1), steps(w2)
-    return min(
-        steps1[pt] + steps2[pt]
-        for pt in steps1.keys() & steps2.keys()
-    )
+class AocRunner(BaseRunner):
+    year = 2019
+    day = 3
+    parser = BaseRunner.lines_parser()
 
+    def run(self, data):
+        l1, l2 = data
+        w1, w2 = l1.split(','), l2.split(',')
+        yield min(map(abs, intersections(w1, w2)))
 
-if __name__ == '__main__':
-    from libaoc import simple_main, files
-    simple_main(2019, 3, files.read_lines, part_1, part_2)
+        steps1, steps2 = steps(w1), steps(w2)
+        yield min(
+            steps1[pt] + steps2[pt]
+            for pt in steps1.keys() & steps2.keys()
+        )

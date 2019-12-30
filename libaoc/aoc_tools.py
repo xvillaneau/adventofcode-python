@@ -59,9 +59,9 @@ V = TypeVar("V")
 class BaseRunner(Generic[V], ABC):
     year: int
     day: int
-    parser: Callable[[str], V]
 
     def main(self):
+        print("\n=====================================")
         print(f"Advent of Code year {self.year}, day {self.day}")
         results = self.run(self.read_data())
 
@@ -87,7 +87,9 @@ class BaseRunner(Generic[V], ABC):
     def read_data(self):
         with open(self.data_path) as file:
             full_data = file.read()
-        return self.parser(full_data)
+        if self.parser is not None:
+            return self.parser(full_data)
+        return full_data
 
     @staticmethod
     def lines_parser():
@@ -102,6 +104,12 @@ class BaseRunner(Generic[V], ABC):
         def fake_parser(_):
             return result
         return fake_parser
+
+    @staticmethod
+    def _noop_parser(data):
+        return data
+
+    parser: Callable[[str], V] = _noop_parser
 
 
 def parse_lines(data: str) -> List[str]:

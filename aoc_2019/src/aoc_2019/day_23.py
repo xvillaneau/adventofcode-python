@@ -1,6 +1,8 @@
 from collections import deque
 from typing import Deque, List, Optional, NamedTuple
-from aoc_2019.intcode import CodeRunner, read_program, OutputInterrupt, InputInterrupt
+
+from libaoc import BaseRunner
+from .intcode import CodeRunner, OutputInterrupt, InputInterrupt
 
 
 class Packet(NamedTuple):
@@ -84,6 +86,10 @@ def day_23(code):
         nas_packet = None
 
 
-if __name__ == '__main__':
-    from libaoc import iter_main
-    iter_main(2019, 23, read_program, day_23)
+class AocRunner(BaseRunner):
+    year = 2019
+    day = 23
+    parser = BaseRunner.int_list_parser(",")
+
+    def run(self, code):
+        yield from day_23(code)

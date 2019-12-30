@@ -1,6 +1,8 @@
 from collections import defaultdict
-from aoc_2019.intcode import CodeRunner, read_program, EndProgram
+
+from libaoc import BaseRunner
 from libaoc.vectors import Walker2D, Direction, Vect2D
+from .intcode import CodeRunner, EndProgram
 
 
 def run_robot(code, start_color=0):
@@ -49,6 +51,11 @@ def part_2(code):
     return out
 
 
-if __name__ == '__main__':
-    from libaoc import simple_main
-    simple_main(2019, 11, read_program, part_1, part_2)
+class AocRunner(BaseRunner):
+    year = 2019
+    day = 11
+    parser = BaseRunner.int_list_parser(",")
+
+    def run(self, code):
+        yield part_1(code)
+        yield part_2(code)

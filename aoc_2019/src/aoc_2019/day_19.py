@@ -3,8 +3,9 @@ from itertools import count
 
 import numpy as np
 
+from libaoc import BaseRunner
 from libaoc.vectors import Vect2D, UP, RIGHT, ORIGIN
-from aoc_2019.intcode import read_program, CodeRunner
+from .intcode import CodeRunner
 
 
 class DroneController:
@@ -92,14 +93,13 @@ def locate_square(controller: DroneController, size=100):
     return top + Vect2D(0, 1 - size)
 
 
-def day_19(code):
-    controller = DroneController(CodeRunner(code))
-    yield detect_ray_surface(controller)
-    x, y = locate_square(controller)
-    print(x, y)
-    yield x * 10_000 + y
+class AocRunner(BaseRunner):
+    year = 2019
+    day = 19
+    parser = BaseRunner.int_list_parser(",")
 
-
-if __name__ == '__main__':
-    from libaoc import iter_main
-    iter_main(2019, 19, read_program, day_19)
+    def run(self, code):
+        controller = DroneController(CodeRunner(code))
+        yield detect_ray_surface(controller)
+        x, y = locate_square(controller)
+        yield x * 10_000 + y

@@ -5,6 +5,7 @@ from itertools import combinations, islice
 from math import pi
 from typing import Dict, FrozenSet, Set, NamedTuple
 
+from libaoc import BaseRunner
 from libaoc.primes import gcd
 from libaoc.vectors import Vect2D
 
@@ -100,15 +101,15 @@ def find_station(sight_scores):
     return max(sight_scores, key=lambda pt: len(sight_scores[pt]))
 
 
-def day_10(space_map: str):
-    field = Field.from_map(space_map)
-    sight_scores = analyze_asteroids(field)
-    station = find_station(sight_scores)
-    yield len(sight_scores[station])
-    vaporize_iter = exterminate(field, sight_scores[station], station)
-    _vap = next(islice(vaporize_iter, 199, None))
-    yield _vap.x * 100 + _vap.y
+class AocRunner(BaseRunner):
+    year = 2019
+    day = 10
 
-if __name__ == '__main__':
-    from libaoc import iter_main, files
-    iter_main(2019, 10, files.read_full, day_10)
+    def run(self, space_map: str):
+        field = Field.from_map(space_map)
+        sight_scores = analyze_asteroids(field)
+        station = find_station(sight_scores)
+        yield len(sight_scores[station])
+        vaporize_iter = exterminate(field, sight_scores[station], station)
+        _vap = next(islice(vaporize_iter, 199, None))
+        yield _vap.x * 100 + _vap.y

@@ -4,7 +4,7 @@ from typing import Dict, List, Set
 
 import numpy as np
 
-from libaoc.files import read_full
+from libaoc import BaseRunner
 from libaoc.graph import HWeightedGraph, build_graph
 from libaoc.matrix import load_string_matrix
 from libaoc.vectors import Vect2D, UNIT_VECTORS
@@ -161,6 +161,10 @@ def day_18_part_2(data: str):
     return solve_four_robots(*graphs)
 
 
-if __name__ == '__main__':
-    from libaoc import simple_main
-    simple_main(2019, 18, read_full, day_18_part_1, day_18_part_2)
+class AocRunner(BaseRunner):
+    year = 2019
+    day = 18
+
+    def run(self, data):
+        yield day_18_part_1(data)
+        yield day_18_part_2(data)

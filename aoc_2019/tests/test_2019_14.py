@@ -1,5 +1,7 @@
 import pytest
-from aoc_2019.day_14 import day_14, most_fuel_produced, compute_required_ore, parse_data_as_matrices
+from aoc_2019.day_14 import AocRunner, most_fuel_produced, compute_required_ore, parse_data_as_matrices
+
+day_14 = AocRunner().run
 
 example_1 = """
 10 ORE => 10 A

@@ -3,6 +3,7 @@ from itertools import combinations, count
 import re
 from typing import Iterable, List
 
+from libaoc import BaseRunner
 from libaoc.primes import merge_pulses
 
 
@@ -145,6 +146,11 @@ def part_2(lines: List[str]):
     return system.find_repeat()
 
 
-if __name__ == '__main__':
-    from libaoc import simple_main, files
-    simple_main(2019, 12, files.read_lines, part_1, part_2)
+class AocRunner(BaseRunner):
+    year = 2019
+    day = 12
+    parser = BaseRunner.lines_parser()
+
+    def run(self, lines):
+        yield part_1(lines)
+        yield part_2(lines)

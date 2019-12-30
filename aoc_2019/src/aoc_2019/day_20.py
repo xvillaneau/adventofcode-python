@@ -4,6 +4,7 @@ from typing import Dict, Iterator, Tuple
 
 import numpy as np
 
+from libaoc import BaseRunner
 from libaoc.graph import HWeightedGraph, build_graph
 from libaoc.matrix import convolve_2d_3x3
 from libaoc.vectors import Vect2D, UP, LEFT, DOWN, RIGHT, UNIT_VECTORS
@@ -140,13 +141,12 @@ def _run_shortest_path(start, end, successors):
             heappush(frontier, (next_dist, neighbor))
 
 
-def day_20(data: str):
-    maze, portals = process_maze(load_maze(data))
-    graph = model_paths(maze, portals)
-    yield shortest_path_simple(graph)
-    yield shortest_path_recursive(graph)
+class AocRunner(BaseRunner):
+    year = 2019
+    day = 20
 
-
-if __name__ == '__main__':
-    from libaoc import files, iter_main
-    iter_main(2019, 20, files.read_full, day_20)
+    def run(self, data: str):
+        maze, portals = process_maze(load_maze(data))
+        graph = model_paths(maze, portals)
+        yield shortest_path_simple(graph)
+        yield shortest_path_recursive(graph)

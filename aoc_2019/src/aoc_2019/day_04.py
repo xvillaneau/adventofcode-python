@@ -1,6 +1,8 @@
-from math import log10
-from typing import List
 import re
+from typing import Tuple
+
+from libaoc import BaseRunner
+
 
 RE_PART_1 = re.compile(r'(.)\1')
 RE_PART_2 = re.compile(r'(.)(?<!\1.)\1(?!\1)')
@@ -31,13 +33,17 @@ def acceptable_passwords(start: int, end: int, re_check):
 
     yield from _rec_passwords(())
 
-def part_1(numbers):
-    return sum(acceptable_passwords(*numbers, RE_PART_1))
 
-def part_2(numbers):
-    return sum(acceptable_passwords(*numbers, RE_PART_2))
+class AocRunner(BaseRunner):
+    year = 2019
+    day = 4
 
+    @staticmethod
+    def parser(data: str):
+        a, b = data.strip().split('-')
+        return int(a), int(b)
 
-if __name__ == '__main__':
-    from libaoc import simple_main, static_input
-    simple_main(2019, 4, static_input((138241, 674034)), part_1, part_2)
+    def run(self, data: Tuple[int, int]):
+        start, stop = data
+        yield sum(acceptable_passwords(start, stop, RE_PART_1))
+        yield sum(acceptable_passwords(start, stop, RE_PART_2))

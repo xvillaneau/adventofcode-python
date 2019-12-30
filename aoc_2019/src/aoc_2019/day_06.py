@@ -1,6 +1,9 @@
 from dataclasses import dataclass, field
 from typing import List, Dict, Optional
 
+from libaoc import BaseRunner
+
+
 @dataclass
 class Body:
     name: str
@@ -32,13 +35,7 @@ def parse_map(orbits_map: List[str]):
     return bodies
 
 
-def part_1(orbits_map: List[str]):
-    bodies = parse_map(orbits_map)
-    return bodies['COM'].orbits()
-
-
-def part_2(orbits_map: List[str]):
-    bodies = parse_map(orbits_map)
+def part_2(bodies: Dict[str, Body]):
     from_you, from_san = bodies["YOU"].parents(), bodies["SAN"].parents()
     from_you.reverse()
     from_san.reverse()
@@ -46,6 +43,12 @@ def part_2(orbits_map: List[str]):
     return len(from_you) + len(from_san) - 2 * fork
 
 
-if __name__ == '__main__':
-    from libaoc import simple_main, files
-    simple_main(2019, 6, files.read_lines, part_1, part_2)
+class AocRunner(BaseRunner):
+    year = 2019
+    day = 6
+    parser = BaseRunner.lines_parser()
+
+    def run(self, data):
+        bodies = parse_map(data)
+        yield bodies['COM'].orbits()
+        yield part_2(bodies)

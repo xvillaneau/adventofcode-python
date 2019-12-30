@@ -1,4 +1,4 @@
-from aoc_2019.day_06 import part_1, parse_map, part_2
+from aoc_2019.day_06 import parse_map, part_2
 
 MAP = """
 COM)B
@@ -21,7 +21,8 @@ def test_parse_map():
     assert bodies['B'].satellites == [bodies['C'], bodies['G']]
 
 def test_part_1():
-    assert part_1(MAP) == 42
+    bodies = parse_map(MAP)
+    assert bodies["COM"].orbits() == 42
 
 MAP_2 = """
 COM)B
@@ -40,4 +41,4 @@ I)SAN
 """.strip().splitlines()
 
 def test_part_2():
-    assert part_2(MAP_2) == 4
+    assert part_2(parse_map(MAP_2)) == 4

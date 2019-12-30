@@ -1,5 +1,7 @@
 import numpy as np
 
+from libaoc import BaseRunner
+
 PATTERN = np.array([0, 1, 0, -1])
 
 def build_pattern(index: int, length: int):
@@ -27,6 +29,11 @@ def full_signal(signal: str):
         signal = np.add.accumulate(signal) % 10
     return ''.join(map(str, signal[:-9:-1]))
 
-if __name__ == '__main__':
-    from libaoc import simple_main, files
-    simple_main(2019, 16, files.read_full, fft, full_signal)
+
+class AocRunner(BaseRunner):
+    year = 2019
+    day = 16
+
+    def run(self, signal):
+        yield fft(signal)
+        yield full_signal(signal)

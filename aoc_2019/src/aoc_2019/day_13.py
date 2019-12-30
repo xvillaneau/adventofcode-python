@@ -1,6 +1,6 @@
-from aoc_2019.intcode import read_program, CodeRunner, EndProgram, InputInterrupt
-
+from libaoc import BaseRunner
 from libaoc.vectors import Vect2D
+from .intcode import CodeRunner, EndProgram, InputInterrupt
 
 
 TILES = {
@@ -53,6 +53,11 @@ def part_2(code):
     return score
 
 
-if __name__ == '__main__':
-    from libaoc import simple_main
-    simple_main(2019, 13, read_program, part_1, part_2)
+class AocRunner(BaseRunner):
+    year = 2019
+    day = 13
+    parser = BaseRunner.int_list_parser(",")
+
+    def run(self, code):
+        yield part_1(code)
+        yield part_2(code)

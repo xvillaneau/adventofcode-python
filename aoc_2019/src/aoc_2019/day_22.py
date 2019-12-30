@@ -2,7 +2,7 @@ from itertools import chain, compress
 import re
 import numpy as np
 
-from libaoc.files import read_lines
+from libaoc import BaseRunner
 from libaoc.primes import extended_euclidian_algorithm
 
 def deal_new_stack(deck):
@@ -68,15 +68,16 @@ def merge_commands_n_times(commands, deck_size, n_steps: int):
     sub_cmds = list(chain.from_iterable(compress(components, bits)))
     return merge_commands(sub_cmds, deck_size)
 
-def day_22(techniques):
-    commands = parse_techniques(techniques)
 
-    yield follow_card(commands, 2019, 10007)
+class AocRunner(BaseRunner):
+    year = 2019
+    day = 22
+    parser = BaseRunner.lines_parser()
 
-    deck_size, n_steps = 119_315_717_514_047, 101_741_582_076_661
-    merged_commands = merge_commands_n_times(commands, deck_size, n_steps)
-    yield revert_card(merged_commands, 2020, deck_size)
+    def run(self, data):
+        commands = parse_techniques(data)
+        yield follow_card(commands, 2019, 10007)
 
-if __name__ == '__main__':
-    from libaoc import iter_main
-    iter_main(2019, 22, read_lines, day_22)
+        deck_size, n_steps = 119_315_717_514_047, 101_741_582_076_661
+        merged_commands = merge_commands_n_times(commands, deck_size, n_steps)
+        yield revert_card(merged_commands, 2020, deck_size)

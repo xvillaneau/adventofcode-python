@@ -1,5 +1,7 @@
 from itertools import islice
-from aoc_2019.day_10 import Field, Pt, analyze_asteroids, day_10, find_station, exterminate
+from aoc_2019.day_10 import Field, Pt, analyze_asteroids, AocRunner, find_station, exterminate
+
+day_10 = AocRunner().run
 
 example_1 = """
 .#..#

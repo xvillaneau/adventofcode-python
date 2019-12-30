@@ -3,9 +3,10 @@ from typing import List, NamedTuple, Tuple
 
 import numpy as np
 
+from libaoc import BaseRunner
 from libaoc.primes import all_factors
 from libaoc.vectors import Direction, Vect2D, StaticWalker
-from aoc_2019.intcode import CodeRunner, read_program, InputInterrupt
+from .intcode import CodeRunner, InputInterrupt
 
 
 def get_image(code) -> str:
@@ -215,15 +216,14 @@ def run_robot(code, routine, func_a, func_b, func_c):
         print(image)
 
 
-def day_17(code):
-    image = get_image(code)
-    filtered_view = find_intersections(image.splitlines())
-    yield alignment_parameter(filtered_view)
-    path = detect_path(filtered_view, find_robot(image.splitlines()))
-    yield run_robot(code, *split_path_pattern(path))
+class AocRunner(BaseRunner):
+    year = 2019
+    day = 17
+    parser = BaseRunner.int_list_parser(",")
 
-
-if __name__ == '__main__':
-    from libaoc import iter_main
-
-    iter_main(2019, 17, read_program, day_17)
+    def run(self, code):
+        image = get_image(code)
+        filtered_view = find_intersections(image.splitlines())
+        yield alignment_parameter(filtered_view)
+        path = detect_path(filtered_view, find_robot(image.splitlines()))
+        yield run_robot(code, *split_path_pattern(path))

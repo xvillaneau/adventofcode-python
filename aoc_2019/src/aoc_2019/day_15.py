@@ -1,8 +1,9 @@
 from collections import deque
 from dataclasses import dataclass
 
+from libaoc import BaseRunner
 from libaoc.vectors import Vect2D, UP, DOWN, LEFT, RIGHT
-from aoc_2019.intcode import CodeRunner, read_program
+from .intcode import CodeRunner
 
 
 DIRECTIONS = [
@@ -77,6 +78,10 @@ def search_oxygen_system(code):
     yield max_oxygen_time
 
 
-if __name__ == '__main__':
-    from libaoc import iter_main
-    iter_main(2019, 15, read_program, search_oxygen_system)
+class AocRunner(BaseRunner):
+    year = 2019
+    day = 15
+    parser = BaseRunner.int_list_parser(",")
+
+    def run(self, code):
+        yield from search_oxygen_system(code)

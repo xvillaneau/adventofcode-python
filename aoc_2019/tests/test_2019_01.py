@@ -1,14 +1,10 @@
-from aoc_2019.day_01 import fuel_iter
+from aoc_2019.day_01 import AocRunner
+
+runner = AocRunner().run
 
 
 def test_fuel_required():
-    assert next(fuel_iter(12)) == 2
-    assert next(fuel_iter(14)) == 2
-    assert next(fuel_iter(1969)) == 654
-    assert next(fuel_iter(100756)) == 33583
-
-
-def test_adjusted_fuel():
-    assert sum(fuel_iter(14)) == 2
-    assert sum(fuel_iter(1969)) == 966
-    assert sum(fuel_iter(100756)) == 50346
+    assert tuple(runner([12])) == (2, 2)
+    assert tuple(runner([14])) == (2, 2)
+    assert tuple(runner([1969])) == (654, 966)
+    assert tuple(runner([100756])) == (33583, 50346)

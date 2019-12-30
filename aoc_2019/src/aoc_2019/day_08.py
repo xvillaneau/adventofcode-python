@@ -1,6 +1,5 @@
-from collections import deque, defaultdict
-from functools import lru_cache, partial
-from typing import Dict, List, Tuple, Set
+from libaoc import BaseRunner
+
 
 def iter_rows(image: str, width: int):
     i = 0
@@ -33,8 +32,13 @@ def decode_image(image: str, width: int = 25, height: int = 6):
                 bottom if top == "2" else top
                 for top, bottom in zip(row, image[r])
             )
-    return '\n' + '\n'.join(image)
+    return ('\n' + '\n'.join(image)).replace("0", " ").replace("1", "#")
 
-if __name__ == '__main__':
-    from libaoc import simple_main, files
-    simple_main(2019, 8, files.read_full, check_image, decode_image)
+
+class AocRunner(BaseRunner):
+    year = 2019
+    day = 8
+
+    def run(self, image):
+        yield check_image(image)
+        yield decode_image(image)

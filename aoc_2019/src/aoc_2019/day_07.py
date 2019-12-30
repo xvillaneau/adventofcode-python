@@ -2,7 +2,9 @@ from itertools import permutations, cycle
 from string import ascii_uppercase
 from typing import List
 
-from aoc_2019.intcode import read_program, CodeRunner
+from libaoc import BaseRunner
+from .intcode import CodeRunner
+
 
 def run_sequence(code: List[int], phase_settings: List[int]):
     signal = 0
@@ -39,6 +41,12 @@ def max_feedback(code):
         for settings in permutations(range(5, 10))
     )
 
-if __name__ == '__main__':
-    from libaoc import simple_main
-    simple_main(2019, 7, read_program, max_signal, max_feedback)
+
+class AocRunner(BaseRunner):
+    year = 2019
+    day = 7
+    parser = BaseRunner.int_list_parser(",")
+
+    def run(self, code):
+        yield max_signal(code)
+        yield max_feedback(code)
