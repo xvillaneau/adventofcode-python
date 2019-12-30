@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from functools import partial, wraps
 from pathlib import Path
 from time import perf_counter_ns
-from typing import Callable, Generator, Generic, List, TypeVar
+from typing import Any, Callable, List
 
 
 def static_input(data):
@@ -53,15 +53,14 @@ def tuple_main(year, day, reader, parts):
 
 
 AOC_ROOT = Path(__file__).parent.parent
-V = TypeVar("V")
 
 
-class BaseRunner(Generic[V], ABC):
+class BaseRunner(ABC):
     year: int
     day: int
 
     def main(self):
-        print("\n=====================================")
+        print("=====================================")
         print(f"Advent of Code year {self.year}, day {self.day}")
         results = self.run(self.read_data())
 
@@ -76,8 +75,10 @@ class BaseRunner(Generic[V], ABC):
         except StopIteration:
             pass
 
+        print()
+
     @abstractmethod
-    def run(self, data: V) -> Generator:
+    def run(self, data):
         pass
 
     @property
@@ -109,7 +110,7 @@ class BaseRunner(Generic[V], ABC):
     def _noop_parser(data):
         return data
 
-    parser: Callable[[str], V] = _noop_parser
+    parser: Callable[[str], Any] = _noop_parser
 
 
 def parse_lines(data: str) -> List[str]:
