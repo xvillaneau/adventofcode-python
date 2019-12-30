@@ -4,11 +4,11 @@ This repository holds all my current solutions to the [Advent of Code](https://a
 
 State of the code by year:
 
-* **2015**: _Completed_. Code mostly good
-* **2016**: In progress (almost there), some of it doesn't run well
+* **2015**: _Completed_. Done recently, so the code mostly good I think.
+* **2016**: In progress (almost there), some of it doesn't run well.
 * **2017**: _Completed_. Old code, lots of it definitely broken.
 * **2018**: Incomplete. Some broken code.
-* **2019**: Ongoing.
+* **2019**: _Completed_ (except day 25). All the code works, currently in the process of cleaning it up.
 
 ## Acknowledgements
 
@@ -18,14 +18,15 @@ Kudos to my colleagues too, off whom I like to bounce ideas.
 
 ## Disclaimer
 
-This is not good code. It is entirely undocumented, mostly untested, not guaranteed to be correct, and most certainly does not reflect any best practices outside formatting. I don't think my AoC solutions are particularly exotic, but that's subjective.
+* _Most of this is not good code_. It is either undocumented, untested, full of assumptions, slow, or broken. Maybe all of the above.
+* I have years of experience writing Python but I am by no means an expert. I try to follow best practices and point out where I explicitly do not, but don't take my word for it.
+* I try to make my solutions run reasonably fast, at the very least not take more than several seconds. I have no reference for what's considered fast or slow, so any claim I make about code being optimized is potentially very very wrong.
+* I don't think my solutions are particularly exotic, but that's subjective. This is mostly "normal" Python.
 
-## Best-Of
+## The Good Stuff
 
-There are a few exceptions however, here is a selection of solutions I am happy with:
-
-* [2015, day 15](aoc_2015/day_10.py): The Look-and-Say sequence
-* More to come maybe someday
+What I _am_ trying to do correctly is to document and explain my solutions accessibly. I recommend heading out to the wiki for the index of documented solutions:
+https://github.com/xvillaneau/adventofcode-python/wiki
 
 ## Requirements
 
