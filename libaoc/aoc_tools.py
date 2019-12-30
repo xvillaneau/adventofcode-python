@@ -91,11 +91,11 @@ class BaseRunner(Generic[V], ABC):
 
     @staticmethod
     def lines_parser():
-        return parse_lines
+        return staticmethod(parse_lines)
 
     @staticmethod
     def int_list_parser(delimiter=None):
-        return partial(parse_int_list, delimiter=delimiter)
+        return staticmethod(partial(parse_int_list, delimiter=delimiter))
 
     @staticmethod
     def static_parser(result):

@@ -1,9 +1,12 @@
-#!/usr/bin/env python3.8
+#!/usr/bin/env python
 import argparse
 from importlib import import_module
 from importlib.util import spec_from_file_location, module_from_spec
 from pathlib import Path
 import sys
+
+if sys.version_info < (3, 8):
+    raise RuntimeError("Only Python >= 3.8 is supported")
 
 YEARS = [2019]  # Add more over time
 AOC_ROOT = Path(__file__).parent
