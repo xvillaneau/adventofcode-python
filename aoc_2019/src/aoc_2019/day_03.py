@@ -1,64 +1,58 @@
-from typing import NamedTuple, List, Iterator, Dict
-from more_itertools import seekable
+from typing import NamedTuple, Iterator, Dict, Tuple
 
 from libaoc import BaseRunner
+from libaoc.vectors import Vect2D
+
+Path = Iterator[Tuple[str, int]]
+Point = Tuple[int, int]
 
 
-class Point(NamedTuple):
-    x: int
-    y: int
-
-    def __add__(self, other):
-        return Point(self.x + other.x, self.y + other.y)
-
-    def __abs__(self):
-        return abs(self.x) + abs(self.y)
+class Segment(NamedTuple):
+    start: Vect2D
+    direction: Vect2D
+    moves: int
+    start_steps: int
 
 
-DIRS = {
-    "U": Point(0, 1),
-    "R": Point(1, 0),
-    "D": Point(0, -1),
-    "L": Point(-1, 0),
-}
+def span_direction(start: Point, direction: str, moves: int):
+    x0, y0 = start
+    if direction in "UD":
+        dy = 1 if direction == "U" else -1
+        y0 += dy
+        for y in range(0, moves * dy, dy):
+            yield x0, y0 + y
+    else:
+        dx = 1 if direction == "R" else -1
+        x0 += dx
+        for x in range(0, moves * dx, dx):
+            yield x0 + x, y0
 
 
-def move(start: Point, instruction: str):
-    direction = DIRS[instruction[0]]
-    moves = int(instruction[1:])
-    point = start
-    yield from (point := point + direction for _ in range(moves))
+def trace(path: Path) -> Dict[Point, int]:
+    visited, point, steps = {}, (0, 0), 1
+    for direction, moves in path:
+        for point in span_direction(point, direction, moves):
+            visited.setdefault(point, steps)
+            steps += 1
+    return visited
 
 
-def path(instructions: List[str]) -> Iterator[Point]:
-    point = Point(0, 0)
-    for instruction in instructions:
-        moves = seekable(move(point, instruction))
-        yield from moves
-        point = moves.elements()[-1]
-
-
-def steps(instructions: List[str]) -> Dict[Point, int]:
-    res = {}
-    for i, point in enumerate(path(instructions)):
-        if point not in res:
-            res[point] = i + 1
-    return res
-
-
-def intersections(wire_1: List[str], wire_2: List[str]):
-    return set(path(wire_1)) & set(path(wire_2))
+def parse_input(_, data: str) -> Tuple[Path, Path]:
+    def split_path(_path: str):
+        return ((word[0], int(word[1:])) for word in _path.split(","))
+    path_1, path_2 = data.strip().splitlines()
+    return split_path(path_1), split_path(path_2)
 
 
 class AocRunner(BaseRunner):
     year = 2019
     day = 3
-    parser = BaseRunner.lines_parser()
+    parser = parse_input
 
-    def run(self, data):
-        l1, l2 = data
-        w1, w2 = l1.split(","), l2.split(",")
-        yield min(map(abs, intersections(w1, w2)))
+    def run(self, paths: Tuple[Path, Path]):
+        path_1, path_2 = paths
+        trace_1, trace_2 = trace(path_1), trace(path_2)
+        intersections = trace_1.keys() & trace_2.keys()
 
-        steps1, steps2 = steps(w1), steps(w2)
-        yield min(steps1[pt] + steps2[pt] for pt in steps1.keys() & steps2.keys())
+        yield min(abs(x) + abs(y) for x, y in intersections)
+        yield min(trace_1[pt] + trace_2[pt] for pt in intersections)
