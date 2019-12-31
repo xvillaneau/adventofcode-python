@@ -5,7 +5,6 @@ https://adventofcode.com/2019/day/2
 For a longer explanation of the problem and my solution, read:
 https://github.com/xvillaneau/adventofcode-python/wiki/AoC-2019-Day-2
 """
-import sys
 
 
 def run_computer(code):
@@ -43,18 +42,16 @@ def find_input_values(code, target):
     )
 
 
-def parse_program(filename):
-    with open(filename, "r") as file:
-        return [int(num) for num in file.read().split(",")]
-
-
-def main(filename):
-    code = parse_program(filename)
-    part_1 = gravity_assist(code, noun=12, verb=2)
-    print("Day 2, part 1:", part_1)
-    part_2 = find_input_values(code, 19690720)
-    print("Day 2, part 2:", part_2)
+def main(data):
+    code = [int(num) for num in data.split(",")]
+    yield gravity_assist(code, noun=12, verb=2)
+    yield find_input_values(code, 19690720)
 
 
 if __name__ == "__main__":
-    main(sys.argv[1])
+    import sys
+
+    with open(sys.argv[1]) as file:
+        _main = main(file.read())
+    print(f"Aoc 2019, day 1, part 1:", next(_main))
+    print(f"Aoc 2019, day 1, part 2:", next(_main))

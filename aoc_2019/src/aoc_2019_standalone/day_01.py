@@ -5,7 +5,6 @@ https://adventofcode.com/2019/day/1
 For a longer explanation of the problem and my solution, read:
 https://github.com/xvillaneau/adventofcode-python/wiki/AoC-2019-Day-1
 """
-import sys
 
 
 def fuel_required(mass):
@@ -23,25 +22,25 @@ def total_fuel_required(mass):
     return total_fuel
 
 
-def read_input_data(filename):
+def read_input_data(data):
     """Read the list of module masses"""
-    data = []
-    with open(filename, "r") as file:
-        for line in file:
-            line = line.strip()
-            if line:
-                data.append(int(line))
-    return data
+    numbers = []
+    for line in data.splitlines():
+        numbers.append(int(line))
+    return numbers
 
 
-def main(filename):
-    data = read_input_data(filename)
-    part_1 = sum(fuel_required(mass) for mass in data)
-    print("Day 1, part 1:", part_1)
-    part_2 = sum(total_fuel_required(mass) for mass in data)
-    print("Day 1, part 2:", part_2)
+def main(data):
+    data = read_input_data(data)
+    yield sum(fuel_required(mass) for mass in data)
+    yield sum(total_fuel_required(mass) for mass in data)
 
 
 # Will only run if this file is executed directly
 if __name__ == "__main__":
-    main(sys.argv[1])
+    import sys
+
+    with open(sys.argv[1]) as file:
+        _main = main(file.read())
+    print(f"Aoc 2019, day 2, part 1:", next(_main))
+    print(f"Aoc 2019, day 2, part 2:", next(_main))
