@@ -5,8 +5,8 @@ from typing import List
 
 import numpy as np
 
-from libaoc import BaseRunner
 from libaoc.algo import DFSearch
+from libaoc.parsers import parse_lines
 
 ORE = 1_000_000_000_000
 
@@ -70,13 +70,8 @@ def most_fuel_produced(prod, cons, fuel_ini=1, n_ore=ORE):
     return fuel - 1
 
 
-class AocRunner(BaseRunner):
-    year = 2019
-    day = 14
-    parser = BaseRunner.lines_parser()
-
-    def run(self, data):
-        prod, cons = parse_data_as_matrices(data)
-        ore_for_1 = compute_required_ore(prod, cons)
-        yield ore_for_1
-        yield most_fuel_produced(prod, cons, fuel_ini=ORE // ore_for_1)
+def main(data: str):
+    prod, cons = parse_data_as_matrices(parse_lines(data))
+    ore_for_1 = compute_required_ore(prod, cons)
+    yield ore_for_1
+    yield most_fuel_produced(prod, cons, fuel_ini=ORE // ore_for_1)

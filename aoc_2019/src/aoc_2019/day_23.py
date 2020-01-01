@@ -1,8 +1,7 @@
 from collections import deque
 from typing import Deque, List, Optional, NamedTuple
 
-from libaoc import BaseRunner
-from .intcode import CodeRunner, OutputInterrupt, InputInterrupt
+from .intcode import CodeRunner, OutputInterrupt, InputInterrupt, parse_intcode
 
 
 class Packet(NamedTuple):
@@ -46,7 +45,8 @@ class Computer(CodeRunner):
             return False
 
 
-def day_23(code):
+def main(data: str):
+    code = parse_intcode(data)
     computers = [Computer(code, addr) for addr in range(50)]
     part_1 = True
     nas_packet: Optional[Packet] = None
@@ -84,12 +84,3 @@ def day_23(code):
         computers[0].queue.append(nas_packet)
         nas_y_prev = nas_packet.y
         nas_packet = None
-
-
-class AocRunner(BaseRunner):
-    year = 2019
-    day = 23
-    parser = BaseRunner.int_list_parser(",")
-
-    def run(self, code):
-        yield from day_23(code)

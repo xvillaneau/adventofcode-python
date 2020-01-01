@@ -1,6 +1,3 @@
-from libaoc import BaseRunner
-
-
 def iter_rows(image: str, width: int):
     i = 0
     while i < len(image):
@@ -39,10 +36,6 @@ def decode_image(image: str, width: int = 25, height: int = 6):
     return ("\n" + "\n".join(image)).replace("0", " ").replace("1", "#")
 
 
-class AocRunner(BaseRunner):
-    year = 2019
-    day = 8
-
-    def run(self, image):
-        yield check_image(image)
-        yield decode_image(image)
+def main(data: str):
+    yield check_image(data)
+    yield decode_image(data)

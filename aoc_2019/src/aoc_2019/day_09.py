@@ -1,5 +1,4 @@
-from libaoc import BaseRunner
-from .intcode import CodeRunner
+from .intcode import CodeRunner, parse_intcode
 
 
 def run_diagnostic(code):
@@ -16,11 +15,7 @@ def run_boost(code):
     return next(runner)
 
 
-class AocRunner(BaseRunner):
-    year = 2019
-    day = 9
-    parser = BaseRunner.int_list_parser(",")
-
-    def run(self, code):
-        yield run_diagnostic(code)
-        yield run_boost(code)
+def main(data: str):
+    code = parse_intcode(data)
+    yield run_diagnostic(code)
+    yield run_boost(code)

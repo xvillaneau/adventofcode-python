@@ -5,13 +5,10 @@ https://adventofcode.com/2019/day/2
 For a longer explanation of the problem and my solution, read:
 https://github.com/xvillaneau/adventofcode-python/wiki/AoC-2019-Day-2
 """
-from typing import List
-
-from libaoc import BaseRunner
-from .intcode import CodeRunner
+from .intcode import CodeRunner, parse_intcode
 
 
-def input_and_run(code: List[int], noun=12, verb=2):
+def input_and_run(code, noun=12, verb=2):
     """
     Set the correct values in memory, run the code and get the output
     (value at address 0 in memory) back.
@@ -22,7 +19,7 @@ def input_and_run(code: List[int], noun=12, verb=2):
     return runner.code[0]
 
 
-def find_input(code: List[int], target=19_690_720):
+def find_input(code, target=19_690_720):
     """
     Assumption-heavy optimization: the code output is linear per the
     inputs, i.e. output = const + dn * noun + dv * verb
@@ -47,11 +44,7 @@ def find_input(code: List[int], target=19_690_720):
     return 100 * noun + verb
 
 
-class AocRunner(BaseRunner):
-    year = 2019
-    day = 2
-    parser = BaseRunner.int_list_parser(",")
-
-    def run(self, data: List[int]):
-        yield input_and_run(data)
-        yield find_input(data)
+def main(data: str):
+    code = parse_intcode(data)
+    yield input_and_run(code)
+    yield find_input(code)

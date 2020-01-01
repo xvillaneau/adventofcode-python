@@ -4,6 +4,10 @@ from functools import lru_cache
 from typing import Callable, List, Tuple
 
 
+def parse_intcode(data: str):
+    return [int(num) for num in data.split(",")]
+
+
 class EndProgram(StopIteration):
     pass
 

@@ -3,10 +3,7 @@ from functools import cached_property
 from itertools import product
 from typing import Iterator, Dict, List, Tuple
 
-from libaoc import BaseRunner
-
 Point = Tuple[int, int]
-Span = Tuple[int, int]
 
 
 DIRECTIONS = {"U": (0, 1), "R": (1, 0), "D": (0, -1), "L": (-1, 0)}
@@ -86,9 +83,3 @@ def main(data: str):
 
     yield min(abs(x) + abs(y) for x, y in intersections)
     yield min(a + b for a, b in intersections.values())
-
-
-class AocRunner(BaseRunner):
-    year = 2019
-    day = 3
-    run = staticmethod(main)

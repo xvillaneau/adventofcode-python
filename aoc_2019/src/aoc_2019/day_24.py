@@ -1,6 +1,5 @@
 import numpy as np
 
-from libaoc import BaseRunner
 from libaoc.matrix import convolve_2d_3x3, load_string_matrix
 
 WEIGHTS = 2 ** np.arange(25)
@@ -80,11 +79,7 @@ def count_after_n_steps(start_bugs, steps):
     return sum(np.sum(bugs) for bugs in layers.values())
 
 
-class AocRunner(BaseRunner):
-    year = 2019
-    day = 24
-
-    def run(self, data):
-        bugs = load_bugs(data)
-        yield first_repeat(bugs)
-        yield count_after_n_steps(bugs, steps=200)
+def main(data: str):
+    bugs = load_bugs(data)
+    yield first_repeat(bugs)
+    yield count_after_n_steps(bugs, steps=200)

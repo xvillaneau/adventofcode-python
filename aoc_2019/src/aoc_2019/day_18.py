@@ -4,7 +4,6 @@ from typing import Dict, List, Set
 
 import numpy as np
 
-from libaoc import BaseRunner
 from libaoc.graph import HWeightedGraph, build_graph
 from libaoc.matrix import load_string_matrix
 from libaoc.vectors import Vect2D, UNIT_VECTORS
@@ -142,24 +141,13 @@ def insert_robots(maze):
     return new_maze
 
 
-def day_18_part_1(data: str):
+def main(data: str):
     maze = load_string_matrix(data)
     graphs = build_graphs(maze)
     assert len(graphs) == 1
-    return find_shortest_path(graphs[0])
+    yield find_shortest_path(graphs[0])
 
-
-def day_18_part_2(data: str):
-    maze = insert_robots(load_string_matrix(data))
-    graphs = build_graphs(maze)
+    new_maze = insert_robots(maze)
+    graphs = build_graphs(new_maze)
     assert len(graphs) == 4
-    return solve_four_robots(*graphs)
-
-
-class AocRunner(BaseRunner):
-    year = 2019
-    day = 18
-
-    def run(self, data):
-        yield day_18_part_1(data)
-        yield day_18_part_2(data)
+    yield solve_four_robots(*graphs)

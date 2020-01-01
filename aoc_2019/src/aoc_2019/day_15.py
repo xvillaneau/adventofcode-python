@@ -1,9 +1,8 @@
 from collections import deque
 from dataclasses import dataclass
 
-from libaoc import BaseRunner
 from libaoc.vectors import Vect2D, UP, DOWN, LEFT, RIGHT
-from .intcode import CodeRunner
+from .intcode import CodeRunner, parse_intcode
 
 
 DIRECTIONS = [
@@ -36,8 +35,8 @@ class DroidPos:
         return result
 
 
-def search_oxygen_system(code):
-    start = DroidPos(CodeRunner(code), Vect2D(0, 0))
+def main(data: str):
+    start = DroidPos(CodeRunner(parse_intcode(data)), Vect2D(0, 0))
     frontier = deque((start,))
     explored = {start.position}
     ox_pos = None
@@ -76,12 +75,3 @@ def search_oxygen_system(code):
             frontier.append((next_pos, ox_time + 1))
 
     yield max_oxygen_time
-
-
-class AocRunner(BaseRunner):
-    year = 2019
-    day = 15
-    parser = BaseRunner.int_list_parser(",")
-
-    def run(self, code):
-        yield from search_oxygen_system(code)

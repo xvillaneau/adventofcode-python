@@ -3,10 +3,9 @@ from typing import List, NamedTuple, Tuple
 
 import numpy as np
 
-from libaoc import BaseRunner
 from libaoc.primes import all_factors
 from libaoc.vectors import Direction, Vect2D, StaticWalker
-from .intcode import CodeRunner, InputInterrupt
+from .intcode import CodeRunner, InputInterrupt, parse_intcode
 
 
 def get_image(code) -> str:
@@ -182,8 +181,8 @@ def split_path_pattern(path: List[str]):
     a, b, c = next(
         p for p in _try_patterns(path_string) if _patterns_work(path_string, p)
     )
-    main = path_string.replace(a, "A").replace(b, "B").replace(c, "C")
-    return ",".join(main), _as_routine(a), _as_routine(b), _as_routine(c)
+    sequence = path_string.replace(a, "A").replace(b, "B").replace(c, "C")
+    return ",".join(sequence), _as_routine(a), _as_routine(b), _as_routine(c)
 
 
 def run_robot(code, routine, func_a, func_b, func_c):
@@ -214,14 +213,11 @@ def run_robot(code, routine, func_a, func_b, func_c):
         print(image)
 
 
-class AocRunner(BaseRunner):
-    year = 2019
-    day = 17
-    parser = BaseRunner.int_list_parser(",")
+def main(data: str):
+    code = parse_intcode(data)
+    image = get_image(code)
+    filtered_view = find_intersections(image.splitlines())
+    yield alignment_parameter(filtered_view)
 
-    def run(self, code):
-        image = get_image(code)
-        filtered_view = find_intersections(image.splitlines())
-        yield alignment_parameter(filtered_view)
-        path = detect_path(filtered_view, find_robot(image.splitlines()))
-        yield run_robot(code, *split_path_pattern(path))
+    path = detect_path(filtered_view, find_robot(image.splitlines()))
+    yield run_robot(code, *split_path_pattern(path))

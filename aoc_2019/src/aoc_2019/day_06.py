@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import List, Dict, Optional
 
-from libaoc import BaseRunner
+from libaoc.parsers import parse_lines
 
 
 @dataclass
@@ -43,12 +43,7 @@ def part_2(bodies: Dict[str, Body]):
     return len(from_you) + len(from_san) - 2 * fork
 
 
-class AocRunner(BaseRunner):
-    year = 2019
-    day = 6
-    parser = BaseRunner.lines_parser()
-
-    def run(self, data):
-        bodies = parse_map(data)
-        yield bodies["COM"].orbits()
-        yield part_2(bodies)
+def main(data: str):
+    bodies = parse_map(parse_lines(data))
+    yield bodies["COM"].orbits()
+    yield part_2(bodies)
