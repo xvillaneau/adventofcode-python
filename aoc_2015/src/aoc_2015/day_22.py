@@ -302,8 +302,9 @@ def least_mana(game_data, hard=False):
     result = a_star.search()
     return int(result.cost)
 
-if __name__ == '__main__':
-    from functools import partial
-    from libaoc import simple_main, static_input
-    part_1, part_2 = least_mana, partial(least_mana, hard=True)
-    simple_main(2015, 22, static_input((50, 500, 51, 9)), part_1, part_2)
+
+def main(_):
+    # TODO: Read data from file
+    data = (50, 500, 51, 9)
+    yield least_mana(data)
+    yield least_mana(data, hard=True)

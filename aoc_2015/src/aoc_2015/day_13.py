@@ -45,6 +45,7 @@ def max_with_me(pref_list: List[str]):
         for seating in permutations(attendees)
     )
 
-if __name__ == '__main__':
-    from libaoc import simple_main, files
-    simple_main(2015, 13, files.read_lines, max_happiness, max_with_me)
+def main(data: str):
+    pref_list = data.splitlines()
+    yield max_happiness(pref_list)
+    yield max_with_me(pref_list)

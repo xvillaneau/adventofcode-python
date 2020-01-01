@@ -1,4 +1,3 @@
-
 import json
 
 def sum_decode(strings):
@@ -12,6 +11,7 @@ def test_sums():
     assert sum_decode(strings) == 12
     assert sum_encode(strings) == 19
 
-if __name__ == '__main__':
-    from libaoc import simple_main, files
-    simple_main(2015, 8, files.read_lines, sum_decode, sum_encode)
+def main(data: str):
+    lines = data.splitlines()
+    yield sum_decode(lines)
+    yield sum_encode(lines)

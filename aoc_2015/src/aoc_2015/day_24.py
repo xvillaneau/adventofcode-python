@@ -1,8 +1,8 @@
-from itertools import count
 from math import prod
 from typing import List, Iterable
 
 from libaoc.algo import sorted_search
+from libaoc.parsers import parse_integer_list
 
 
 def split_load_in_3(packages: Iterable[int]):
@@ -70,6 +70,7 @@ def make_combinations(sorted_sizes: List[int], n: int, size: int):
             yield combination + (elem,)
 
 
-if __name__ == '__main__':
-    from libaoc import simple_main, files
-    simple_main(2015, 24, files.read_int_list, part_1, part_2)
+def main(data: str):
+    packages = parse_integer_list(data)
+    yield part_1(packages)
+    yield part_2(packages)

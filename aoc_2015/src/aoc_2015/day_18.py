@@ -37,6 +37,7 @@ def animate_stuck(start_lights: str, steps=100):
         lights = transform_stuck_corners(lights)
     return np.sum(lights)
 
-if __name__ == '__main__':
-    from libaoc import simple_main, files
-    simple_main(2015, 18, files.read_full, animate, animate_stuck)
+
+def main(data: str):
+    yield animate(data)
+    yield animate_stuck(data)

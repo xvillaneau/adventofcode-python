@@ -2,7 +2,6 @@ from itertools import chain, compress
 import re
 import numpy as np
 
-from libaoc.parsers import parse_lines
 from libaoc.primes import extended_euclidian_algorithm
 
 
@@ -78,7 +77,7 @@ def merge_commands_n_times(commands, deck_size, n_steps: int):
 
 
 def main(data: str):
-    commands = parse_techniques(parse_lines(data))
+    commands = parse_techniques(data.splitlines())
     yield follow_card(commands, 2019, 10007)
 
     deck_size, n_steps = 119_315_717_514_047, 101_741_582_076_661

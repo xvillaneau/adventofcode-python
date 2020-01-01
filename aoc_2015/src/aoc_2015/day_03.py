@@ -36,6 +36,7 @@ def test_count_visits():
     assert count_robosanta_visits('^>v<') == 3
     assert count_robosanta_visits('^v^v^v^v^v') == 11
 
-if __name__ == '__main__':
-    from libaoc import simple_main, files
-    simple_main(2015, 3, files.read_full, count_one_visit, count_robosanta_visits)
+
+def main(data: str):
+    yield count_one_visit(data)
+    yield count_robosanta_visits(data)

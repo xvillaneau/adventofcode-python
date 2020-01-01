@@ -1,5 +1,5 @@
-from collections import defaultdict
 from itertools import count
+
 from libaoc.primes import all_factors
 
 def n_presents_1(house: int):
@@ -27,6 +27,11 @@ def part_2(n_presents: int):
         if n_presents_2(house) >= n_presents
     )
 
-if __name__ == '__main__':
-    from libaoc import simple_main, static_input
-    simple_main(2015, 20, static_input(33100000), part_1, part_2)
+
+def main(data: str):
+    # n_presents = int(data)
+    # yield part_1(n_presents)
+    # yield part_2(n_presents)
+    # TODO: This is VERY slow
+    yield "OPTIMIZE ME!!"
+    return

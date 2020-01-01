@@ -20,8 +20,6 @@ def coin_mine_6(key: bytes):
 def test_mine():
     assert coin_mine_5(b'abcdef') == 609043
 
-if __name__ == '__main__':
-    from libaoc import simple_main
-    day_input = b'yzbqklnj'
-    reader = lambda year, day: day_input
-    simple_main(2015, 4, reader, coin_mine_5, coin_mine_6)
+def main(data: str):
+    yield coin_mine_5(data.encode())
+    yield coin_mine_6(data.encode())

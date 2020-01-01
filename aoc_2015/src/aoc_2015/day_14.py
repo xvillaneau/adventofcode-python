@@ -49,6 +49,8 @@ def max_points(reindeer: List[str], time=2503):
 
     return max(points)
 
-if __name__ == '__main__':
-    from libaoc import simple_main, files
-    simple_main(2015, 14, files.read_lines, max_distance, max_points)
+
+def main(data: str):
+    reindeer = data.splitlines()
+    yield max_distance(reindeer)
+    yield max_points(reindeer)

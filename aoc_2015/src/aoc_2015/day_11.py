@@ -63,11 +63,7 @@ def next_valid(password: str):
         pw for pw in PasswordGen(password.encode()) if is_valid(pw)
     ).decode()
 
-def two_next_valid(password: str):
+def main(password: str):
     first = next_valid(password)
-    second = next_valid(first)
-    return first, second
-
-if __name__ == '__main__':
-    from libaoc import static_input, tuple_main
-    tuple_main(2015, 11, static_input('cqjxjnds'), two_next_valid)
+    yield first
+    yield next_valid(first)

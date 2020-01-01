@@ -42,6 +42,7 @@ def find_sue_2(list_sues):
             return num
 
 
-if __name__ == '__main__':
-    from libaoc import simple_main, files
-    simple_main(2015, 16, files.read_lines, find_sue, find_sue_2)
+def main(data: str):
+    aunts = data.splitlines()
+    yield find_sue(aunts)
+    yield find_sue_2(aunts)

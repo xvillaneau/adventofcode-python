@@ -35,6 +35,6 @@ def nice_counts(strings):
         nicer += is_nicer(s)
     return nice, nicer
 
-if __name__ == '__main__':
-    from libaoc import files, tuple_main
-    tuple_main(2015, 5, files.read_lines, nice_counts)
+
+def main(data: str):
+    yield from nice_counts(data.splitlines())

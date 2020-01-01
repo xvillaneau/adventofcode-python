@@ -120,6 +120,8 @@ def test_shortest_delivery():
     assert shortest_delivery(graph).length == 605
 
 
-if __name__ == '__main__':
-    from libaoc import simple_main, files
-    simple_main(2015, 9, files.read_lines, part_1, part_2)
+def main(data: str):
+    lines = data.splitlines()
+    yield part_1(lines)
+    yield part_2(lines)
+

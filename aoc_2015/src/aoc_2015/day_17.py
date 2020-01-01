@@ -1,4 +1,5 @@
 from typing import List
+from libaoc.parsers import parse_integer_list
 
 def _combinations(containers: List[int], target=150, total=0, n_cont=0):
     if total == target:
@@ -18,6 +19,6 @@ def count_container_combinations(containers: List[int], target=150):
     smallest = min(combinations)
     return len(combinations), combinations.count(smallest)
 
-if __name__ == '__main__':
-    from libaoc import tuple_main, files
-    tuple_main(2015, 17, files.read_int_list, count_container_combinations)
+
+def main(data: str):
+    yield from count_container_combinations(parse_integer_list(data))

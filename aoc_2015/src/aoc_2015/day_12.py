@@ -17,12 +17,8 @@ def sum_numbers(data, exclude=()):
         return res
     return 0
 
-def sum_nums_in_json(raw_data: str):
-    return sum_numbers(json.loads(raw_data))
 
-def sum_nums_in_json_2(raw_data: str):
-    return sum_numbers(json.loads(raw_data), exclude={"red"})
-
-if __name__ == '__main__':
-    from libaoc import simple_main, files
-    simple_main(2015, 12, files.read_full, sum_nums_in_json, sum_nums_in_json_2)
+def main(raw_data: str):
+    data = json.loads(raw_data)
+    yield sum_numbers(data)
+    yield sum_numbers(data, exclude={"red"})

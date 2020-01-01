@@ -89,7 +89,6 @@ def player_wins(player: Character, boss: Character):
         if not player.alive:
             return False
 
-BOSS = (103, 9, 2)
 
 def part_1(boss):
     return min(
@@ -103,6 +102,8 @@ def part_2(boss):
         if not player_wins(equip_player(eqp), Character(*boss))
     )
 
-if __name__ == '__main__':
-    from libaoc import static_input, simple_main
-    simple_main(2015, 21, static_input(BOSS), part_1, part_2)
+
+def main(_):
+    # TODO: Read input from file
+    yield part_1((103, 9, 2))
+    yield part_2((103, 9, 2))

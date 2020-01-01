@@ -87,9 +87,9 @@ class ControllableLampGrid(LampGrid):
 def run(instructions, dim=(1000, 1000)):
     lamps_1 = LampGrid(*dim)
     lamps_2 = ControllableLampGrid(*dim)
-    for l in instructions:
-        lamps_1.run_instruction(l)
-        lamps_2.run_instruction(l)
+    for line in instructions:
+        lamps_1.run_instruction(line)
+        lamps_2.run_instruction(line)
     return lamps_1.count_lights(), lamps_2.count_lights()
 
 def test_lights():
@@ -101,6 +101,5 @@ def test_lights():
     assert run(instr, (4, 4)) == 10
 
 
-if __name__ == '__main__':
-    from libaoc import tuple_main, files
-    tuple_main(2015, 6, files.read_lines, run)
+def main(data: str):
+    yield from run(data.splitlines())

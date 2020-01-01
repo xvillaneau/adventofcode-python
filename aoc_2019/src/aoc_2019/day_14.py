@@ -6,7 +6,6 @@ from typing import List
 import numpy as np
 
 from libaoc.algo import DFSearch
-from libaoc.parsers import parse_lines
 
 ORE = 1_000_000_000_000
 
@@ -71,7 +70,7 @@ def most_fuel_produced(prod, cons, fuel_ini=1, n_ore=ORE):
 
 
 def main(data: str):
-    prod, cons = parse_data_as_matrices(parse_lines(data))
+    prod, cons = parse_data_as_matrices(data.splitlines())
     ore_for_1 = compute_required_ore(prod, cons)
     yield ore_for_1
     yield most_fuel_produced(prod, cons, fuel_ini=ORE // ore_for_1)

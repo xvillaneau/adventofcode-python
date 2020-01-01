@@ -50,6 +50,6 @@ def best_recipes(ingredients_list, cal_lim=500):
             max_cal = score
     return max_all, max_cal
 
-if __name__ == '__main__':
-    from libaoc import tuple_main, files
-    tuple_main(2015, 15, files.read_lines, best_recipes)
+
+def main(data: str):
+    yield from best_recipes(data.splitlines())

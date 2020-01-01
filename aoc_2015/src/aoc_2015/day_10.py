@@ -142,14 +142,8 @@ def look_and_say_length(string: str, depth: int) -> int:
     return next(islice(iter_look_and_say_lengths(string), depth, None))
 
 
-def day_10(string: str):
+def main(string: str):
     """Yields the lengths at 40 and 50 steps"""
     iterator = iter_look_and_say_lengths(string)
     yield next(islice(iterator, 40, None))
     yield next(islice(iterator, 9, None))
-
-
-if __name__ == "__main__":
-    from libaoc import iter_main, static_input
-
-    iter_main(2015, 10, static_input("1113122113"), day_10)

@@ -80,8 +80,8 @@ def run(code, **init):
         pointer += 1 if res is None else res
     return regs
 
-if __name__ == '__main__':
-    from libaoc import simple_main, files
-    from functools import partial
-    part_1, part_2 = run, partial(run, a=1)
-    simple_main(2015, 23, files.read_lines, part_1, part_2)
+
+def main(data: str):
+    code = data.splitlines()
+    yield run(code)
+    yield run(code, a=1)

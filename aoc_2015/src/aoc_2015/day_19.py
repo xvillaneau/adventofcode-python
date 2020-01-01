@@ -45,6 +45,7 @@ def fewest_transforms(replacements, molecule):
 def part_2(data):
     return len(fewest_transforms(*parse_input(data, reverse=True))) - 1
 
-if __name__ == '__main__':
-    from libaoc import simple_main, files
-    simple_main(2015, 19, files.read_full, part_1, part_2)
+
+def main(data: str):
+    yield part_1(data)
+    yield part_2(data)

@@ -1,8 +1,6 @@
 from dataclasses import dataclass, field
 from typing import List, Dict, Optional
 
-from libaoc.parsers import parse_lines
-
 
 @dataclass
 class Body:
@@ -44,6 +42,6 @@ def part_2(bodies: Dict[str, Body]):
 
 
 def main(data: str):
-    bodies = parse_map(parse_lines(data))
+    bodies = parse_map(data.splitlines())
     yield bodies["COM"].orbits()
     yield part_2(bodies)

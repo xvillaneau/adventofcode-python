@@ -16,10 +16,6 @@ def get_code(index: int):
         _cache.append(code)
     return code
 
-def part_1(coords):
-    return get_code(index_of(*coords))
-
-if __name__ == '__main__':
-    from libaoc import simple_main, static_input
-    puzzle_input = static_input((2978, 3083))
-    simple_main(2015, 25, puzzle_input, part_1)
+def main(_):
+    # TODO: Read data from file
+    yield get_code(index_of(2978, 3083))

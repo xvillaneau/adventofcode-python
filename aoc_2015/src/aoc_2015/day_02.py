@@ -53,6 +53,7 @@ def test_ribbon():
     assert Box(1, 1, 10).ribbon_required == 14
 
 
-if __name__ == '__main__':
-    from libaoc import simple_main, files
-    simple_main(2015, 2, files.read_lines, total_paper, total_ribbon)
+def main(data: str):
+    boxes = data.splitlines()
+    yield total_paper(boxes)
+    yield total_ribbon(boxes)

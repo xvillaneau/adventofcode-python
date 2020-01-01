@@ -3,7 +3,6 @@ from itertools import combinations, count
 import re
 from typing import Iterable, List
 
-from libaoc.parsers import parse_lines
 from libaoc.primes import merge_pulses
 
 
@@ -147,6 +146,6 @@ def part_2(lines: List[str]):
 
 
 def main(data: str):
-    lines = parse_lines(data)
+    lines = data.splitlines()
     yield part_1(lines)
     yield part_2(lines)

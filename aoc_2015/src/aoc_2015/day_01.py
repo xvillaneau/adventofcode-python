@@ -1,7 +1,3 @@
-
-from libaoc import simple_main
-from libaoc.files import read_full
-
 def parse_instructions(instructions: str):
     char_map = {"(": 1, ")": -1}
     yield from map(char_map.__getitem__, instructions.strip())
@@ -16,5 +12,7 @@ def basement_first(instructions: str) -> int:
         if pos == -1:
             return i+1
 
-if __name__ == '__main__':
-    simple_main(2015, 1, read_full, count_floors, basement_first)
+
+def main(data: str):
+    yield count_floors(data)
+    yield basement_first(data)
