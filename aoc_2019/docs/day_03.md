@@ -174,3 +174,25 @@ def main(data):
 [Here is the full code for day 3](../src/aoc_2019_standalone/day_03.py). You can run it with:
 
     ./run_aoc.py 2019 3 standalone
+
+## My Solution
+
+If you inspect the puzzle input for day 3, you will discover that each wire is made of approximately 300 segments and is 150,000 steps long. Yet there are only a few dozen intersections! This means that up to 99.99% of the coordinates we compute are not relevant to the puzzle.
+
+With this in mind, my approach is to model segments as abstract entities, then only attempt to compute intersections between segments that can share the same area in space. This is however quite intricate to implement.
+
+At the core of my solution is the `Segment` class, which is a frozen dataclass. Its four basic properties are similar to what we used before: start coordinates, a direction, a length, and the index (number of steps) at the start.
+
+The collision detection logic lives in `Segment.span` and `Segment.overlaps()`. The first is a property holding the "box" in space occupied by the segment, defined by its start and stop indices in x and y (inclusive). For example, the segment starting at `(0, 1)` going right for 2 steps has a span of `(0, 2), (1, 1)`.
+
+Then `Segment.overlaps()` uses that data to detect if two segment intersect, that is if both the x and y spans of each segment overlap. The implementation is a little obscure but that's for a reason. `overlaps()` will be run many many times (once for EVERY pair of segments) so it has to be very fast, and this is the best I could do so far.
+
+The rest of the intersection logic is wired up in `Segment.__and__()`. If two segments intersect, then this returns a list of tuples composed of a position, its index in on the first wire, and its index on the second wire.
+
+Because a segment needs to be initialized with its start position and index, the parsing routine does a first pass of wire computation where only the starts and end of segments are computed. Thankfully, that is much faster than iterating over the length of each segment.
+
+The `main` is slightly more complicated. This is where each segment is intersected with every other (using `itertools.product`). Because there is no longer a guarantee that points are traversed in order, the code tracks the steps to each intersection for both wires and makes sure we always keep the lowest value for the final result.
+
+In practice, this solution runs on my machine in 50 ms, against 110 ms for the simpler one. So it is around twice as fast… which is not very impressive in my opinion. In the end my solution only needed to process the exact path of 45 of the 600 segments, but it still requires 300 × 300 = 90,000 runs of the overlapping detection. The more complicated question to answer is how does the runtime scale with complexity. I am not entirely sure  how; it is likely a combination of number of segments, average segment length, and number of intersections.
+
+I think there might be even faster approaches: for part 1, segments could be sorted by their minimal distance to the origin before comparing them, and part 2 could go through segments of each wire sequentially. Maybe I'll try implementing that someday.

@@ -82,11 +82,16 @@ def parse_input(data: str) -> Tuple[Path, Path]:
 
 def main(data: str):
     path_1, path_2 = parse_input(data)
-    intersections = {}
+    intersections = set()
+    dist_a, dist_b = {}, {}
 
     for seg_a, seg_b in product(path_1, path_2):
         for point, ind_a, ind_b in seg_a & seg_b:
-            intersections[point] = (ind_a, ind_b)
+            intersections.add(point)
+            if dist_a.setdefault(point, ind_a) > ind_a:
+                dist_a[point] = ind_a
+            if dist_b.setdefault(point, ind_b) > ind_b:
+                dist_b[point] = ind_b
 
     yield min(abs(x) + abs(y) for x, y in intersections)
-    yield min(a + b for a, b in intersections.values())
+    yield min(dist_a[pt] + dist_b[pt] for pt in intersections)
