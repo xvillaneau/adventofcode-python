@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 import argparse
-from functools import partial
 from importlib import import_module
 from importlib.util import spec_from_file_location, module_from_spec
 from pathlib import Path
 import sys
-from time import perf_counter_ns
+from time import perf_counter_ns, perf_counter
 
 if sys.version_info < (3, 8):
     raise RuntimeError("Only Python >= 3.8 is supported")
@@ -45,40 +44,39 @@ def get_main(year: int, day: int):
     if hasattr(module, "main"):
         # Has a main function, expected to be a generator that takes
         # the full input file as argument.
-        return partial(run_day_main, year, day, module.main)
-
-    if hasattr(module, "AocRunner"):
-        # Has an AocRunner class. This was a bad idea.
-        return module.AocRunner().aoc_main
+        return make_main(year, day, module.main)
 
     raise ImportError(f"No compatible main found in {module}")
 
 
-def timed_next(generator):
-    """Get the next value from a generator and time how long it takes"""
-    start = perf_counter_ns()
-    result = next(generator)
-    stop = perf_counter_ns()
-    return result, (stop - start)
-
-
-def run_day_main(year: int, day: int, day_main):
-    print(f"Advent of Code year {year}, day {day}")
+def make_main(year: int, day: int, day_main):
 
     data_path = AOC_ROOT / f"aoc_{year}" / "data" / f"day_{day:02}.txt"
     with open(data_path, "r") as file:
-        main = day_main(file.read())
+        data = file.read()
 
-    p1_res, p1_time = timed_next(main)
-    print("Part 1:", p1_res)
-    print(f"\tRan in {p1_time:,} ns")
+    def run_part(generator, part, timed=False):
+        start = perf_counter_ns()
+        result = next(generator)
+        stop = perf_counter_ns()
 
-    try:
-        p2_res, p2_time = timed_next(main)
-        print("Part 2:", p2_res)
-        print(f"\tRan in {p2_time:,} ns")
-    except StopIteration:
-        pass
+        print(f"Part {part}:\t{result}")
+        if timed:
+            print(f"    Ran in {stop - start:,} ns")
+
+    def wrapped_main(timed=False):
+        title = f"Advent of Code year {year}, day {day}"
+        print("=" * len(title), title, sep="\n")
+        main = day_main(data)
+
+        run_part(main, 1, timed)
+        try:
+            run_part(main, 2, timed)
+        except StopIteration:
+            pass
+        print()
+
+    return wrapped_main
 
 
 def process_args(year: int, day: int, interactive: bool):
@@ -111,9 +109,10 @@ def process_args(year: int, day: int, interactive: bool):
     return years, days
 
 
-def aoc_main(year: int, day: int, interactive=True, namespace=""):
+def aoc_main(year: int, day: int, interactive=True, namespace="", timed=False):
     years, days = process_args(year, day, interactive)
 
+    start = perf_counter()
     # Run the solutions!
     for year in years:
         # Load the package containing this year's code
@@ -123,9 +122,13 @@ def aoc_main(year: int, day: int, interactive=True, namespace=""):
             try:
                 day_main = get_main(year, day)
             except ImportError:
-                print(f"Skipping {year} day {day}, import failed")
+                print(f"Skipping {year} day {day}, import failed\n")
             else:
-                day_main()
+                day_main(timed=timed)
+
+    if timed and len(days) > 1:
+        stop = perf_counter()
+        print(f"Total run time: {stop - start:.1f} s")
 
 
 if __name__ == "__main__":
@@ -134,5 +137,6 @@ if __name__ == "__main__":
     parser.add_argument("day", type=int, nargs="?", default=-1)
     parser.add_argument("namespace", type=str, nargs="?", default="")
     parser.add_argument("--yes", "-y", dest="interactive", action="store_false")
+    parser.add_argument("--with-timing", "-t", dest="timed", action="store_true")
 
     aoc_main(**vars(parser.parse_args()))
