@@ -1,3 +1,10 @@
+"""
+Advent of Code 2019 day 3
+https://adventofcode.com/2019/day/3
+
+For a longer explanation of the problem and my solution, read:
+https://github.com/xvillaneau/adventofcode-python/wiki/AoC-2019-Day-3
+"""
 from dataclasses import dataclass
 from functools import cached_property
 from itertools import product
@@ -30,10 +37,7 @@ class Segment:
 
     @cached_property
     def trace(self) -> Dict[Point, int]:
-        result = {}
-        for steps, point in self:
-            result.setdefault(point, steps)
-        return result
+        return {point: steps for steps, point in self}
 
     def overlaps(self, other: 'Segment') -> bool:
         (ax, ay), (bx, by) = self.span, other.span
@@ -41,12 +45,15 @@ class Segment:
 
     def __iter__(self):
         x0, y0 = self.start
-        if self.direction in "UD":
-            dy = 1 if self.direction == "U" else -1
-            coords = ((x0, y0 + y) for y in range(dy, (self.moves + 1) * dy, dy))
+        indices = range(1, self.moves + 1)
+        if self.direction == "U":
+            coords = ((x0, y0 + y) for y in indices)
+        elif self.direction == "D":
+            coords = ((x0, y0 - y) for y in indices)
+        elif self.direction == "R":
+            coords = ((x0 + x, y0) for x in indices)
         else:
-            dx = 1 if self.direction == "R" else -1
-            coords = ((x0 + x, y0) for x in range(dx, (self.moves + 1) * dx, dx))
+            coords = ((x0 - x, y0) for x in indices)
         yield from enumerate(coords, start=self.index + 1)
 
     def __and__(self, other: 'Segment') -> List[Tuple[Point, int, int]]:
