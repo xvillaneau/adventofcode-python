@@ -14,7 +14,7 @@ YEARS = [2019]  # Add more over time
 AOC_ROOT = Path(__file__).parent
 
 
-def load_year(year: int):
+def load_year(year: int, namespace=""):
     """
     Load the package with the year's code. Designed to work without
     having to install the code in the PYTHONPATH.
@@ -23,7 +23,8 @@ def load_year(year: int):
     if name in sys.modules:
         return
 
-    location = AOC_ROOT / name / "src" / name / "__init__.py"
+    src_folder = f"{name}_{namespace}" if namespace else name
+    location = AOC_ROOT / name / "src" / src_folder / "__init__.py"
     if not location.is_file():
         raise ImportError(f"Package for {name} does not exist")
 
@@ -110,13 +111,13 @@ def process_args(year: int, day: int, interactive: bool):
     return years, days
 
 
-def aoc_main(year: int, day: int, interactive: bool = True):
+def aoc_main(year: int, day: int, interactive=True, namespace=""):
     years, days = process_args(year, day, interactive)
 
     # Run the solutions!
     for year in years:
         # Load the package containing this year's code
-        load_year(year)
+        load_year(year, namespace=namespace)
 
         for day in days:
             try:
@@ -131,6 +132,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("year", type=int, nargs="?", default=-1)
     parser.add_argument("day", type=int, nargs="?", default=-1)
+    parser.add_argument("namespace", type=str, nargs="?", default="")
     parser.add_argument("--yes", "-y", dest="interactive", action="store_false")
 
     aoc_main(**vars(parser.parse_args()))
