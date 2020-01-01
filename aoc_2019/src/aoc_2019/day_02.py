@@ -2,8 +2,8 @@
 Advent of Code 2019, day 2
 https://adventofcode.com/2019/day/2
 
-For a longer explanation of the problem and my solution, read:
-https://github.com/xvillaneau/adventofcode-python/wiki/AoC-2019-Day-2
+Run it with:  python run_aoc.py 2019 2
+Read the docs at:  /aoc_2019/docs/day_02.md
 """
 from .intcode import CodeRunner, parse_intcode
 

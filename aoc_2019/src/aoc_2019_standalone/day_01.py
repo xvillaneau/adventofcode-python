@@ -2,8 +2,8 @@
 Advent of Code 2019, day 1, "Conventional" solution
 https://adventofcode.com/2019/day/1
 
-For a longer explanation of the problem and my solution, read:
-https://github.com/xvillaneau/adventofcode-python/wiki/AoC-2019-Day-1
+Run it with:  python run_aoc.py 2019 1 standalone
+Read the docs at:  /aoc_2019/docs/day_01.md
 """
 
 

@@ -2,8 +2,8 @@
 Advent of Code 2019 day 3
 https://adventofcode.com/2019/day/3
 
-For a longer explanation of the problem and my solution, read:
-https://github.com/xvillaneau/adventofcode-python/wiki/AoC-2019-Day-3
+Run it with:  python run_aoc.py 2019 3
+Read the docs at:  /aoc_2019/docs/day_03.md
 """
 from dataclasses import dataclass
 from functools import cached_property
