@@ -2,6 +2,10 @@
 
 https://adventofcode.com/2019/day/3
 
+- [Part 1](#part-1)
+- [Part 2](#part-2)
+- [My Solution](#my-solution)
+
 Today's puzzle is a relatively classic early AoC puzzle, where we need to apply move instructions in 2D space.
 
 ## Part 1
@@ -59,11 +63,11 @@ segment_path = [
 
 Say we start at `(0, 0)` and we are going right 4 times. Then `x` will be iterating over `range(1, 5)` which are the numbers from 1 to 4 included. The points in the segment will be: `(1, 0)`, `(2, 0)`, `(3, 0)`, and `(4, 0)`.
 
-You may wonder why we aren't starting from 0. This has a double benifit:
-1. If the starting point is the last point of the previous segment, then it has already been covered and we don't output it twice.
+You may wonder why we aren't starting from 0. This has a double benefit:
+1. Since the starting point is the last point of the previous segment, then it has already been covered and we should not process it twice.
 2. It conveniently excludes `(0, 0)` from the first segment, which is always an intersection that we need to ignore.
 
-All that's left is to wire up that logic for all four directions:
+All that's left is to write the logic for all four directions:
 
 ```python
 def segment_path(start, direction, moves):
@@ -95,7 +99,7 @@ def compute_path(wire):
 
 This works by assigning each `point` to `start` after every step, so that `start` is assigned to the last point of the segment when the inner loop ends. That way, the next call of `segment_path` starts at the correct position.
 
-We're also storing the positions in a set. Sets are different from lists in that they are unordered, do not allow duplicates, and can only store hashable objects. The upside is that membership testing (`a in b`) is extremely fast! Unlike lists where testing if one contains an element grows linearly in time with the list's size.
+We're also storing the positions in a set. Sets are different from lists in that they are unordered, do not allow duplicates, and can only store hashable objects. They are also less memory-efficient than lists. The upside is that the complexity of membership testing (`a in b`) is fast and constant, no matter how large the set is! This is unlike lists where membership testing grows linearly in time with the list's size.
 
 Because we are using sets, finding the intersections between the two paths is now a piece of cake:
 
@@ -103,7 +107,7 @@ Because we are using sets, finding the intersections between the two paths is no
 intersections = path_1 & path_2
 ```
 
-The `&` operator stands for "binary and", but applied to sets it computes the intersection of two sets. In other words, it returns a new set with only the elements that are present in both input sets.
+The `&` operator stands for "binary and". When applied between two sets it computes their intersection. In other words, it returns a new set with only the elements that are present in both input sets.
 
 Finally, we need to isolate the closest point. We only need to know its distance, so we can compute all distances first and get the smallest value from there.
 
@@ -127,7 +131,7 @@ def main(data):
 
 ## Part 2
 
-Change of plans; the closest point is no good and we are to find the intersection reached in the fewest steps. Thankfully, we can add this functionality with very few changes.
+Change of plans; the closest point is no good and we are asked to find the intersection reached in the fewest steps. Thankfully, we can add this functionality with few changes.
 
 Let's first think about our data structure. Using a set of points is no longer enough, we also need to store how many (fewest) steps it takes to reach each point. The best data structure for this is a dictionary with points as keys and steps as values. Points will still stored as a set (a set is more or less a dict without values and only keys) and we can store an unique value for each.
 
@@ -141,7 +145,7 @@ def compute_path(wire):
 
     for direction, moves in wire:
         for point in segment_path(start, direction, moves):
-            if point not is path:
+            if point not in path:
                 path[point] = steps
             steps += 1
             start = point
@@ -177,15 +181,19 @@ def main(data):
 
 ## My Solution
 
+[Here is my code for day 3](../src/aoc_2019/day_03.py). You can run it with:
+
+    ./run_aoc.py 2019 3
+
 If you inspect the puzzle input for day 3, you will discover that each wire is made of approximately 300 segments and is 150,000 steps long. Yet there are only a few dozen intersections! This means that up to 99.99% of the coordinates we compute are not relevant to the puzzle.
 
 With this in mind, my approach is to model segments as abstract entities, then only attempt to compute intersections between segments that can share the same area in space. This is however quite intricate to implement.
 
-At the core of my solution is the `Segment` class, which is a frozen dataclass. Its four basic properties are similar to what we used before: start coordinates, a direction, a length, and the index (number of steps) at the start.
+At the core of my solution is the `Segment` class, which is a frozen dataclass. Its four basic properties are similar to what we used before: start coordinates, a direction, a length, and the index (number of steps) at the start. It has several derived properties, for which I'm using the new [`functools.cached_property`](https://docs.python.org/3/library/functools.html#functools.cached_property) decorator introduced in Python 3.8.
 
 The collision detection logic lives in `Segment.span` and `Segment.overlaps()`. The first is a property holding the "box" in space occupied by the segment, defined by its start and stop indices in x and y (inclusive). For example, the segment starting at `(0, 1)` going right for 2 steps has a span of `(0, 2), (1, 1)`.
 
-Then `Segment.overlaps()` uses that data to detect if two segment intersect, that is if both the x and y spans of each segment overlap. The implementation is a little obscure but that's for a reason. `overlaps()` will be run many many times (once for EVERY pair of segments) so it has to be very fast, and this is the best I could do so far.
+Then `Segment.overlaps()` uses that data to detect if two segment intersect, that is if both the x and y spans of each segment overlap. The implementation is a little obscure but that's for a reason. `overlaps()` will be run many many times (once for _every_ pair of segments) so it has to be very optimized, and this is the best I could do so far.
 
 The rest of the intersection logic is wired up in `Segment.__and__()`. If two segments intersect, then this returns a list of tuples composed of a position, its index in on the first wire, and its index on the second wire.
 
