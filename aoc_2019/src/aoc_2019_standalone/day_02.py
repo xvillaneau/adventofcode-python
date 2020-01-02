@@ -53,5 +53,5 @@ if __name__ == "__main__":
 
     with open(sys.argv[1]) as file:
         _main = main(file.read())
-    print(f"Aoc 2019, day 1, part 1:", next(_main))
-    print(f"Aoc 2019, day 1, part 2:", next(_main))
+    print(f"Aoc 2019, day 2, part 1:", next(_main))
+    print(f"Aoc 2019, day 2, part 2:", next(_main))
