@@ -1,8 +1,8 @@
 """
-Advent of Code 2019, day 1, "Conventional" solution
+Advent of Code 2019 day 1, simple solution
 https://adventofcode.com/2019/day/1
 
-Run it with:  python run_aoc.py 2019 1 standalone
+Run it with:  python run_aoc.py 2019 1 simple
 Read the docs at:  /aoc_2019/docs/day_01.md
 """
 

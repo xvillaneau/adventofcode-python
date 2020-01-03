@@ -232,9 +232,9 @@ def find_input_values(code, target):
     )
 ```
 
-[Here is the full code](../src/aoc_2019_standalone/day_02.py) where everything we studied above is assembled together. You can run it with:
+[Here is the full code](../src/aoc_2019_simple/day_02.py) where everything we studied above is assembled together. You can run it with:
 
-    ./run_aoc.py 2019 2 standalone
+    ./run_aoc.py 2019 2 simple
 
 ## Implementations
 

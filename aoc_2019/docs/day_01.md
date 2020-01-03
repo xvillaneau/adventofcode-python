@@ -228,16 +228,16 @@ def part_2(data):
     print(total_fuel_2)
 ```
 
-[Here is the full implementation of both parts](../src/aoc_2019_standalone/day_01.py). You can run it with:
+[Here is the full implementation of both parts](../src/aoc_2019_simple/day_01.py). You can run it with:
 
-    ./run_aoc.py 2019 1 standalone
+    ./run_aoc.py 2019 1 simple
 
 The main differences with all the code we previously discussed are:
 
 1. I've modified the `part_1` and `part_2` functions to return their result instead of printing it.
 2. The `if __name__ == "__main__"` section at the end will only run the code in it if the script is executed directly. In this particular case, this structure allows you to test the script without going through my custom runner by calling it with `python` and specifying the path to the data file as a positional argument. For example (with fake answers):
    ```
-   $ python aoc_2019/src/aoc_2019_standalone/day_01.py aoc_2019/data/day_01.txt
+   $ python aoc_2019/src/aoc_2019_simple/day_01.py aoc_2019/data/day_01.txt
    Aoc 2019, day 1, part 1: 123456789
    Aoc 2019, day 1, part 2: 987654321
    ```

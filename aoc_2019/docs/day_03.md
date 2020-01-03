@@ -175,9 +175,9 @@ def main(data):
     yield min(path_1[pt] + path_2[pt] for pt in intersections)  # Part 2
 ```
 
-[Here is the full code for day 3](../src/aoc_2019_standalone/day_03.py). You can run it with:
+[Here is the full code for day 3](../src/aoc_2019_simple/day_03.py). You can run it with:
 
-    ./run_aoc.py 2019 3 standalone
+    ./run_aoc.py 2019 3 simple
 
 ## My Solution
 
