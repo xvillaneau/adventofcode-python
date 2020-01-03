@@ -39,7 +39,7 @@ class Segment:
     def trace(self) -> Dict[Point, int]:
         return {point: steps for steps, point in self}
 
-    def overlaps(self, other: 'Segment') -> bool:
+    def overlaps(self, other: "Segment") -> bool:
         (ax, ay), (bx, by) = self.span, other.span
         return ax[0] <= bx[1] and ax[1] >= bx[0] and ay[0] <= by[1] and ay[1] >= by[0]
 
@@ -56,7 +56,7 @@ class Segment:
             coords = ((x0 - x, y0) for x in indices)
         yield from enumerate(coords, start=self.index + 1)
 
-    def __and__(self, other: 'Segment') -> List[Tuple[Point, int, int]]:
+    def __and__(self, other: "Segment") -> List[Tuple[Point, int, int]]:
         if not self.overlaps(other):
             return []
         intersections = self.trace.keys() & other.trace.keys()
@@ -67,7 +67,6 @@ Path = Iterator[Segment]
 
 
 def parse_input(data: str) -> Tuple[Path, Path]:
-
     def generate_path(path: str):
         moves, pos = 0, (0, 0)
         for word in path.split(","):

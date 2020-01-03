@@ -22,18 +22,20 @@ EXAMPLES = [
         [6, 3, 0, 7, 4, 1, 8, 5, 2, 9],
     ),
     (
-        "\n".join([
-            "deal into new stack",
-            "cut -2",
-            "deal with increment 7",
-            "cut 8",
-            "cut -4",
-            "deal with increment 7",
-            "cut 3",
-            "deal with increment 9",
-            "deal with increment 3",
-            "cut -1",
-        ]),
+        "\n".join(
+            [
+                "deal into new stack",
+                "cut -2",
+                "deal with increment 7",
+                "cut 8",
+                "cut -4",
+                "deal with increment 7",
+                "cut 3",
+                "deal with increment 9",
+                "deal with increment 3",
+                "cut -1",
+            ]
+        ),
         [9, 2, 5, 8, 1, 4, 7, 0, 3, 6],
     ),
 ]

@@ -6,6 +6,7 @@ Run it with:  python run_aoc.py 2019 3 standalone
 Read the docs at:  /aoc_2019/docs/day_03.md
 """
 
+
 def segment_path(start, direction, moves):
     """Get the coordinates of all points on a segment"""
     x0, y0 = start
