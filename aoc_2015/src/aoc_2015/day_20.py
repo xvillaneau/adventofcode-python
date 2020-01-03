@@ -1,6 +1,6 @@
 from itertools import count
 
-from libaoc.primes import all_factors
+from libaoc.math import all_factors
 
 def n_presents_1(house: int):
     return sum(all_factors(house)) * 10

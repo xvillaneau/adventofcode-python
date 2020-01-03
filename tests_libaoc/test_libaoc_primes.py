@@ -1,4 +1,4 @@
-from libaoc.primes import merge_pulses
+from libaoc.math import merge_pulses
 
 def test_merge_pulses():
     assert merge_pulses((0, 3), (0, 5)) == (0, 15)

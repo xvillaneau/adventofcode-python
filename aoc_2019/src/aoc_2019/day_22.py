@@ -1,7 +1,7 @@
 from itertools import chain, compress
 from typing import List, Tuple
 
-from libaoc.primes import extended_euclidian_algorithm
+from libaoc.math import extended_euclidian_algorithm
 
 
 DEAL_NEW, CUT, DEAL_INCREMENT = 0, 1, 2

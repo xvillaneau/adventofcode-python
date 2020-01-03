@@ -3,7 +3,7 @@ from itertools import combinations, count
 import re
 from typing import Iterable, List
 
-from libaoc.primes import merge_pulses
+from libaoc.math import merge_pulses
 
 
 @dataclass(frozen=True)

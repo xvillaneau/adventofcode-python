@@ -5,7 +5,7 @@ from itertools import combinations, islice
 from math import pi
 from typing import Dict, FrozenSet, Set, NamedTuple
 
-from libaoc.primes import gcd
+from libaoc.math import gcd
 from libaoc.vectors import Vect2D
 
 

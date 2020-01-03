@@ -3,7 +3,7 @@ from typing import List, NamedTuple, Tuple
 
 import numpy as np
 
-from libaoc.primes import all_factors
+from libaoc.math import all_factors
 from libaoc.vectors import Direction, Vect2D, StaticWalker
 from .intcode import CodeRunner, InputInterrupt, parse_intcode
 
