@@ -1,85 +1,106 @@
 from itertools import chain, compress
-import re
-import numpy as np
+from typing import List, Tuple
 
 from libaoc.primes import extended_euclidian_algorithm
 
 
-def deal_new_stack(deck):
-    return deck[::-1]
+DEAL_NEW, CUT, DEAL_INCREMENT = 0, 1, 2
+Techniques = List[Tuple[int, int]]
 
 
-def cut_stack(deck, n):
-    return np.roll(deck, -n)
+def parse_techniques(data: str) -> Techniques:
+    """
+    Read the human-friendly instructions and convert them into machine
+    instructions. Instructions are tuple of (operation, argument) where
+    0 is "deal new", 1 is "cut", 2 is "deal with increment".
+    """
 
-
-def deal_with_increment(deck, n):
-    r = len(deck)
-    ind = np.arange(r)
-    rev_ind = (ind * n) % r
-    np.put(ind, rev_ind, np.arange(r))
-    return deck[ind]
-
-
-def parse_techniques(techniques):
-    commands = []
-    for line in techniques:
+    def parse_line(line: str):
         if line == "deal into new stack":
-            commands.append((0, 0))
-        elif m := re.match(r"cut (-?\d+)", line):
-            commands.append((1, int(m.group(1))))
-        elif m := re.match(r"deal with increment (\d+)", line):
-            commands.append((2, int(m.group(1))))
+            return DEAL_NEW, 0
+        elif line.startswith("cut"):
+            return CUT, int(line.rpartition(" ")[2])
+        elif line.startswith("deal with increment"):
+            return DEAL_INCREMENT, int(line.rpartition(" ")[2])
         else:
             raise ValueError(f"Bad line: {line}")
-    return commands
+
+    return [parse_line(_line) for _line in data.splitlines()]
 
 
-def follow_card(commands, card: int, deck_size):
-    position = card
-    for cmd, arg in commands:
-        if cmd == 0:
+def follow_card(techniques: Techniques, deck_size: int, position: int) -> int:
+    """Compute the position of a card after shuffling"""
+    for cmd, arg in techniques:
+        if cmd == DEAL_NEW:
             position = deck_size - position - 1
-        elif cmd == 1:
+        elif cmd == CUT:
             position = (position - arg) % deck_size
-        else:  # incr
+        else:  # DEAL_INCREMENT
             position = (position * arg) % deck_size
     return position
 
 
-def revert_card(commands, position: int, deck_size):
-    for cmd, arg in commands[::-1]:
-        if cmd == 0:
+def revert_card(techniques: Techniques, deck_size: int, position: int) -> int:
+    """Compute the starting position corresponding to a final position"""
+    for cmd, arg in techniques[::-1]:
+        if cmd == DEAL_NEW:
+            # Reverse of "deal new" is itself
             position = deck_size - position - 1
-        elif cmd == 1:
+        elif cmd == CUT:
+            # Reverse of "cut" is the same with negative argument
             position = (position + arg) % deck_size
-        else:  # incr
+        else:  # DEAL_INCREMENT
+            # Reversing "deal with increment" requires some maths
             p, _, _ = extended_euclidian_algorithm(arg, deck_size)
-            position = (p * position) % deck_size
+            position = (position * p) % deck_size
     return position
 
 
-def merge_commands(commands, deck_size):
-    zero = follow_card(commands, 0, deck_size)
-    one = follow_card(commands, 1, deck_size)
-    offset = deck_size - zero
-    increment = (one - zero) % deck_size
-    return [(2, increment), (1, offset)]
+def merge_techniques(techniques: Techniques, deck_size: int) -> Techniques:
+    """
+    Here is the core magic for part 2: it turns out that ANY set of
+    techniques is ALWAYS equivalent to one "deal with increment"
+    followed by a cut. Any we only need to know the end positions of
+    cards 0 and 1 to figure out the equivalence.
+    """
+    pos_zero = follow_card(techniques, deck_size, 0)
+    pos_one = follow_card(techniques, deck_size, 1)
+    offset = deck_size - pos_zero
+    increment = (pos_one - pos_zero) % deck_size
+    return [(DEAL_INCREMENT, increment), (CUT, offset)]
 
 
-def merge_commands_n_times(commands, deck_size, n_steps: int):
-    components = [merge_commands(commands, deck_size)]
+def merge_commands_n_times(
+    techniques: Techniques, deck_size: int, n_steps: int
+) -> Techniques:
+    """
+    Compute the equivalent deal + cut (see above) to a given list of
+    techniques applied many times in a row.
+    """
+    # The components list holds in each cell the equivalent deal + cut
+    # applying the techniques 2 ** i times (where i is the position in
+    # the list). We initialize it with 2 ** 0 = 1 applications.
+    components = [merge_techniques(techniques, deck_size)]
+
+    # Build the components by doubling the techniques until we have
+    # as many as our input step count is large in base 2.
     while len(components) < n_steps.bit_length():
-        components.append(merge_commands(components[-1] + components[-1], deck_size))
+        components.append(merge_techniques(components[-1] * 2, deck_size))
+
+    # Build an equivalent set of techniques to the number of repeats
+    # by decomposing that number in binary and picking the components
     bits = [b == "1" for b in bin(n_steps)[:1:-1]]
     sub_cmds = list(chain.from_iterable(compress(components, bits)))
-    return merge_commands(sub_cmds, deck_size)
+
+    # Merge the binary decomposition to get the result!
+    return merge_techniques(sub_cmds, deck_size)
 
 
 def main(data: str):
-    commands = parse_techniques(data.splitlines())
-    yield follow_card(commands, 2019, 10007)
+    """Main routine for AoC 2019 day 22"""
+    techniques = parse_techniques(data)
+    yield follow_card(techniques, 10007, 2019)
 
     deck_size, n_steps = 119_315_717_514_047, 101_741_582_076_661
-    merged_commands = merge_commands_n_times(commands, deck_size, n_steps)
-    yield revert_card(merged_commands, 2020, deck_size)
+    merged_techniques = merge_commands_n_times(techniques, deck_size, n_steps)
+    yield revert_card(merged_techniques, deck_size, 2020)
