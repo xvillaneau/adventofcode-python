@@ -1,3 +1,12 @@
+"""
+Advent of Code 2015 day 10, simple solution
+https://adventofcode.com/2015/day/10
+
+Run it with:  python run_aoc.py 2015 10 simple
+Read the docs at:  /aoc_2015/docs/day_10.md
+"""
+
+
 def look_and_say(string):
     """Run a single iteration of look-and-say"""
     result = ""
