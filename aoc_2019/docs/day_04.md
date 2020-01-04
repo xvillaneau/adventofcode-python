@@ -36,7 +36,7 @@ def to_digits(number):
 As a reminder, our passwords must fullfill these two properties:
 
 1. the digits are in increasing order (left to right),
-2. there's the same digit twice in a row at least once.
+2. there is the same digit twice in a row at least once.
 
 This can be checked by comparing each pair of consecutive digits in the number:
 
@@ -85,7 +85,7 @@ def check_password(number):
     for left, right in zip(digits, digits[1:]):
         if left > right:
             return False
-        if left == right:
+        elif left == right:
             has_pair = True
     return has_pair
 ```
@@ -109,3 +109,59 @@ This can be simplified a lot, because Booleans in Pythons _are_ numbers! In fact
 def part_1(start, stop):
     return sum(check_password(code) for code in range(start, stop + 1))
 ```
+
+## Part 2
+
+The idea for part 2 is generally the same as part 1, but now only _strict_ pairs of digits are accepted. In other words, having a digit three or more times in a row bars it from counting as a pair. The increasing digits order condition from before is still in effect.
+
+This significantly complicates the pair checking logic. We can no longer mark the pair condition as fullfilled the moment a digit repeat; instead we need to track how many times the digit repeats until and only consider a pair detected if that count was two.
+
+Let's modify our loop by adding a `streak` variable counting how many times the current left digit has been detected in a row:
+
+```python
+def check_password_2(number):
+    has_strict_pair = False
+    streak = 1
+
+    digits = to_digits(number)
+    for left, right in zip(digits, digits[1:]):
+        if left > right:
+            return False
+        elif left == right:
+            streak += 1
+        else:  # left < right
+            if streak == 2:
+                has_strict_pair = True
+            streak = 1
+    ...
+```
+
+This code does not work yet though. If the only strict pair is in the two last digits, then the number will not pass the test. Try walking through the above code with 11 as input to see for yourself. So we need to add a final check on `streak` once the loop is over:
+
+```python
+def check_password_2(number):
+    has_strict_pair = False
+    streak = 1
+
+    digits = to_digits(number)
+    for left, right in zip(digits, digits[1:]):
+        if left > right:
+            return False
+        elif left == right:
+            streak += 1
+        else:  # left < right
+            if streak == 2:
+                has_strict_pair = True
+            streak = 1
+
+    if streak == 2:
+        has_strict_pair = True
+
+    return has_strict_pair
+```
+
+[Here is the full implementation of both parts](../src/aoc_2019_simple/day_04.py). You can run it with:
+
+    ./run_aoc.py 2019 4 simple
+
+You will notice in there a bit of code that I have not talked about. The `parse_input_range` function's role is to convert the range input from a string like `"138241-674034"` to the `start` and `stop` arguments as integers. It is not essential to solving the problem.
