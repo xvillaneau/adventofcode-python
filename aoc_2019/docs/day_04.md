@@ -1,6 +1,10 @@
-# Advent of Code 2019, day 3
+# Advent of Code 2019, day 4
 
 https://adventofcode.com/2019/day/4
+
+- [Part 1](#part-1)
+- [Part 2](#part-2)
+- [My Solution](#my-solution)
 
 ## Part 1
 
@@ -116,7 +120,7 @@ The idea for part 2 is generally the same as part 1, but now only _strict_ pairs
 
 This significantly complicates the pair checking logic. We can no longer mark the pair condition as fullfilled the moment a digit repeat; instead we need to track how many times the digit repeats until and only consider a pair detected if that count was two.
 
-Let's modify our loop by adding a `streak` variable counting how many times the current left digit has been detected in a row:
+Let's modify our loop by adding a `streak` variable counting how many times in a row the current left digit has occurred:
 
 ```python
 def check_password_2(number):
@@ -136,7 +140,7 @@ def check_password_2(number):
     ...
 ```
 
-This code does not work yet though. If the only strict pair is in the two last digits, then the number will not pass the test. Try walking through the above code with 11 as input to see for yourself. So we need to add a final check on `streak` once the loop is over:
+This code does not work quite yet though. If the only strict pair is in the last two digits, then the number will not pass the test. Try walking through the code above with `11` as input to see for yourself. One way to work around this is to check `streak` one last time after the loop ends:
 
 ```python
 def check_password_2(number):
@@ -165,3 +169,25 @@ def check_password_2(number):
     ./run_aoc.py 2019 4 simple
 
 You will notice in there a bit of code that I have not talked about. The `parse_input_range` function's role is to convert the range input from a string like `"138241-674034"` to the `start` and `stop` arguments as integers. It is not essential to solving the problem.
+
+Finally, if you think looping through the numbers twice is wasteful then you are not alone! It is possible (and relatively easy, give it a try!) to combine the logic for both parts into one loop, halving the run time of the code. We can do much better though…
+
+## My Solution
+
+[Here is my approach to solving the puzzle](../src/aoc_2019/day_04.py). You can run it with:
+
+    ./run_aoc.py 2019 4
+
+This solution was built from the observation that the ordering constraint on the digits is _very_ discriminating. On my input range, more than 99.5% of the tested numbers do not meet that condition! 
+
+This means that our `sum(... for code in range(...))` is looping over _many_ numbers that could be ignored much earlier. For example, of all numbers between 900,000 and 999,999 only one is in the correct order (999,999). Yet our loop will test all 10,000 numbers in that range.
+
+So this approach builds the possible codes gradually, starting with the right digit. More significant digits are then added one by one, but only picked from the digits allowed by the ordering constraint. For example, if the number I have built so far is `578`, then I only need to consider the digits from 0 to 5 at the next step. In this case, it saves me from exploring 400 invalid codes without processing a single one of them!
+
+I decided to implement my solution recursively. This means that the function in charge of adding a digit to the code calls itself to add the next digits. And once it reaches 6 digits, the final correctness checks are made before counting the code as valid.
+
+The implementation details of this are a little opaque. Instead of splitting the code into its digits, I keep it as a single number at all times. My recursion also tracks how many digits have been added so far using `magnitude`, which is the power of ten corresponding to the current layer (100,000 being the last). Doing so simplifies the math a little. Otherwise, the logic for the other checks (pairs, strict pairs, streak…) is roughly the same but adapted to the recursive implementation.
+
+While we are here, I would like to point your attention to the use of `yield from` and `yield` in the recursive inner functions. These are not just recursive functions, they are recursive _generators_! I think those work astonishingly well with "wide" recursive algorithms. Recursion has a bad reputation in Python but I think that is not always justified. It is a very powerful tool, although a potentially dangerous one. It is worth understanding when to and not to use it.
+
+In the end, all this complexity pays off! The simple solution runs in 1.1 seconds on my laptop (without the combined loops optimization), and my solution runs in between 3 ms and 5 ms. That's 200× to 300× faster! I am quite happy with that.

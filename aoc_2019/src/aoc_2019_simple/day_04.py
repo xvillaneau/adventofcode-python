@@ -8,6 +8,7 @@ Read the docs at:  /aoc_2019/docs/day_04.md
 
 
 def to_digits(number):
+    """Split a number into its digits"""
     digits = []
     while number:
         digits.append(number % 10)
@@ -16,19 +17,28 @@ def to_digits(number):
 
 
 def check_password(number):
+    """
+    Test the validity of a password: its digits must be in increasing
+    order from left to right, and in must have repeated digits.
+    """
     has_pair = False
 
     digits = to_digits(number)
     for left, right in zip(digits, digits[1:]):
-        if left > right:
+        if left > right:  # Ordering is wrong
             return False
-        if left == right:
+        elif left == right:
             has_pair = True
 
+    # Loop ended: ordering must be correct
     return has_pair
 
 
 def check_password_2(number):
+    """
+    Stricter validity check: digits must still be ordered but only
+    pairs of exactly two identical digits count, not more.
+    """
     has_strict_pair = False
     streak = 1
 
@@ -39,11 +49,11 @@ def check_password_2(number):
         elif left == right:
             streak += 1
         else:  # left < right
-            if streak == 2:
+            if streak == 2:  # Check if this was a strict pair
                 has_strict_pair = True
-            streak = 1
+            streak = 1  # Reset the streak
 
-    if streak == 2:
+    if streak == 2:  # Final check for the last digits
         has_strict_pair = True
 
     return has_strict_pair
