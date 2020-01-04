@@ -1,3 +1,12 @@
+"""
+Advent of Code 2019 day 4, simple solution
+https://adventofcode.com/2019/day/4
+
+Run it with:  python run_aoc.py 2019 4 simple
+Read the docs at:  /aoc_2019/docs/day_04.md
+"""
+
+
 def to_digits(number):
     digits = []
     while number:
@@ -6,42 +15,38 @@ def to_digits(number):
     return digits[::-1]
 
 
-def test_password(number):
-    digits = to_digits(number)
+def check_password(number):
     has_pair = False
 
-    previous = digits[0]
-    for digit in digits[1:]:
-        if digit < previous:
+    digits = to_digits(number)
+    for left, right in zip(digits, digits[1:]):
+        if left > right:
             return False
-        if digit == previous:
+        if left == right:
             has_pair = True
-        previous = digit
 
     return has_pair
 
 
-def test_password_2(number):
-    digits = to_digits(number)
-    has_good_pair = False
+def check_password_2(number):
+    has_strict_pair = False
     streak = 1
 
-    previous = digits[0]
-    for digit in digits[1:]:
-        if digit < previous:
+    digits = to_digits(number)
+    for left, right in zip(digits, digits[1:]):
+        if left > right:
             return False
-        elif digit == previous:
+        elif left == right:
             streak += 1
-        else:  # digit > previous
+        else:  # left < right
             if streak == 2:
-                has_good_pair = True
+                has_strict_pair = True
             streak = 1
-        previous = digit
 
     if streak == 2:
-        has_good_pair = True
+        has_strict_pair = True
 
-    return has_good_pair
+    return has_strict_pair
 
 
 def parse_input_range(data: str):
@@ -52,12 +57,12 @@ def parse_input_range(data: str):
 
 def part_1(start, stop):
     """Part 1 of AoC 2019, day 4"""
-    return sum(test_password(num) for num in range(start, stop + 1))
+    return sum(check_password(num) for num in range(start, stop + 1))
 
 
 def part_2(start, stop):
     """Part 2 of AoC 2019, day 4"""
-    return sum(test_password_2(num) for num in range(start, stop + 1))
+    return sum(check_password_2(num) for num in range(start, stop + 1))
 
 
 def main(data):

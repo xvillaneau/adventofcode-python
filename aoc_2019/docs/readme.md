@@ -26,3 +26,12 @@
   [My solution](../src/aoc_2019/day_03.py)
 * **Themes:** 2D geometry, data structures, iteration, collision detection
 * **Difficulty:** Beginner
+
+#### Day 4: Counting valid passwords
+
+* [**Documentation link**](day_04.md)
+* **Code links:**
+  [Simple solution](../src/aoc_2019_simple/day_04.py),
+  [My solution](../src/aoc_2019/day_04.py)
+* **Themes:** Loops, flow control, recursion
+* **Difficulty:** Intermediate
