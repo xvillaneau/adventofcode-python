@@ -35,36 +35,21 @@ around 2 milliseconds on my machine. It can even calculate the length
 of the 10,000th term under a second. Try it out!
 """
 from functools import lru_cache
-from itertools import islice
+from itertools import count, groupby, islice
 import re
 from typing import List, Generator
 
 
 def look_and_say(string: str):
-    """
-    Simple implementation of look-and-say using a loop.
-    Interestingly, this is pretty much the fastest
-    implementation I could make; nothing else comes close.
-    """
-    result, times, repeat = "", 1, string[0]
-    for char in string[1:]:
-        if char != repeat:
-            result += str(times) + repeat
-            times, repeat = 1, char
-        else:
-            times += 1
-    result += str(times) + repeat
+    """Alternate look-and-say implementation using itertools"""
+    result = ""
+    for char, grouper in groupby(string):
+        result += str(sum(1 for _ in grouper)) + char
     return result
 
 
-def naive_deep_look_and_say(string: str, depth: int):
-    for _ in range(depth):
-        string = look_and_say(string)
-    return string
-
-
 # Splitting a sequence
-RE_ENDSPLIT = re.compile(r"[^2]22$")
+RE_END_SPLIT = re.compile(r"[^2]22$")
 RE_SPLITS = [
     re.compile(r"21([^1])(?!\1)"),
     re.compile(r"2111[^1]"),
@@ -84,7 +69,7 @@ def split(string: str) -> List[str]:
 
 def _split(string: str) -> Generator[str, None, None]:
     """Internal recursive generator for splitting"""
-    if RE_ENDSPLIT.search(string):
+    if RE_END_SPLIT.search(string):
         yield from _split(string[:-2])
         yield "22"
     else:
@@ -102,27 +87,10 @@ def _split(string: str) -> Generator[str, None, None]:
 @lru_cache(maxsize=128)
 def memoized_look_say_split(string: str) -> List[str]:
     """
-    Runs look-and-say then splits the result. Also keeps it in
-    cache. Only 128 values are necessary since any sequence
-    eventually splits into patterns of 92 elements.
+    Runs look-and-say then splits the result.
     IMPORTANT: DO NOT APPLY TO zero-day strings!
     """
     return split(look_and_say(string))
-
-
-@lru_cache(maxsize=4096)
-def _recursive_lns_length(string: str, depth: int) -> int:
-    """
-    Main recursive routine. Thanks to the theory of look-and-say,
-    this terminates even if called for VERY large values. However
-    that requires calling the steps one-by-one in order.
-    """
-    if depth <= 0:
-        return len(string)
-    res, n_depth = 0, depth - 1
-    for atom in memoized_look_say_split(string):
-        res += _recursive_lns_length(atom, n_depth)
-    return res
 
 
 def iter_look_and_say_lengths(string: str) -> Generator[int, None, None]:
@@ -130,16 +98,25 @@ def iter_look_and_say_lengths(string: str) -> Generator[int, None, None]:
     Iterate over the lengths of the consecutive look-and-say
     applications, starting with the given string.
     """
+
+    @lru_cache(maxsize=2048)
+    def recursive_lns_length(_string: str, depth: int) -> int:
+        """
+        This function MUST be called with incremental depths otherwise
+        it will miss the cache and recurse pass the stack size. Hence
+        why it's hidden in the closure of the iterator.
+        """
+        if depth <= 0:
+            return len(_string)
+        res, n_depth = 0, depth - 1
+        for atom in memoized_look_say_split(_string):
+            res += recursive_lns_length(atom, n_depth)
+        return res
+
     yield len(string)
-    i, string = 0, look_and_say(string)
-    while True:
-        yield _recursive_lns_length(string, i)
-        i += 1
-
-
-def look_and_say_length(string: str, depth: int) -> int:
-    """Calculate the length of Look-and-Say at a given depth"""
-    return next(islice(iter_look_and_say_lengths(string), depth, None))
+    string = look_and_say(string)
+    for i in count():
+        yield recursive_lns_length(string, i)
 
 
 def main(string: str):
