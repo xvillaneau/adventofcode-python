@@ -80,11 +80,13 @@ What "splitting" means here is that a string can be divided into substrings that
 
 My splitting implementation relies mostly on regular expressions. There's one case to identify if a string ends with `[^2]22` (in which case the `22` can be isolated), then 5 main cases where the split is done between after the first character:
 
-    21([^1])(?!\1)
-    2111[^1]
-    23(?:$|([^3]){1,2}(?!\1))
-    2([^123])(?!\1)
-    [^123][123]
+```regexp
+21([^1])(?!\1)
+2111[^1]
+23(?:$|([^3]){1,2}(?!\1))
+2([^123])(?!\1)
+[^123][123]
+```
 
 That logic is then applied recursively on each side of the split string. It's not the most pretty approach, but it works.
 
