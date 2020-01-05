@@ -7,4 +7,4 @@
   [Simple solution](../src/aoc_2015_simple/day_10.py),
   [My solution](../src/aoc_2015/day_10.py)
 * **Themes:** Loops, recursion, caching, generators
-* **Difficulty:** Beginner
+* **Difficulty:** Beginner (simple solution), Advanced (fast solution)
