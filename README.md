@@ -27,6 +27,7 @@ Kudos to my colleagues too, off whom I like to bounce ideas.
 
 What I _am_ trying to do correctly is to document and explain my solutions accessibly. I recommend heading out to the wiki for the index of documented solutions:
 
+* [Index for 2015 solutions](aoc_2015/docs/readme.md)
 * [Index for 2019 solutions](aoc_2019/docs/readme.md)
 
 ## Requirements
