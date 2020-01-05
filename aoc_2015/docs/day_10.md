@@ -57,8 +57,10 @@ Using his findings, we can _massively_ improve our solution, to the point where 
 
 ### Splitting the string
 
-The first useful result we can use is _The Splitting Theorem_, which reads:
+The first and most fundamental result from this paper is one that allows us to _divide_ the problem. It reads as follows:
 
+> _The Splitting Theorem_:
+>
 > A 2-day-old string `LR` splits as `L.R` just if one of `L` and `R` is empty or `L` and `R` are of the types shown in one of:
 > 
 > | L   | R
@@ -67,9 +69,9 @@ The first useful result we can use is _The Splitting Theorem_, which reads:
 > | 2]  | [1<sup>1</sup>X<sup>1</sup> or [1<sup>3</sup> or [3<sup>1</sup>X<sup>≠1</sup> or [n<sup>1</sup> (n ≥ 4)
 > | ≠2] | [2<sup>2</sup>1<sup>1</sup>X<sup>1</sup> or [2<sup>2</sup>1<sup>3</sup> or [2<sup>2</sup>3<sup>1</sup>X<sup>≠1</sup> or [2<sup>2</sup>n<sup>(0 or 1)</sup> (n ≥ 4)
 
-This intimidating table will be the most complicated part of the implementation, I promise. But it's the most important.
+This intimidating table will be the most complicated part of the implementation, I promise. But it is the most important.
  
-What "splitting" means here is that a string can be divided into substrings that will never interfere again with each other when look-and-say is applied. For example, here are the possible splits at each level starting with 31133:
+What "splitting" means here is that a string can be divided into substrings. And those will _never_ interfere with each other again no matter how many times look-and-say is applied. For example, here are the possible splits at each level starting with 31133:
  
     31133
     132.12.3
@@ -78,7 +80,7 @@ What "splitting" means here is that a string can be divided into substrings that
     1321133112.132112.3113
     11131.22.12.32112.1113122112.132113
 
-My splitting implementation relies mostly on regular expressions. There's one case to identify if a string ends with `[^2]22` (in which case the `22` can be isolated), then 5 main cases where the split is done between after the first character:
+My splitting implementation relies mostly on regular expressions. A first step detects if a string ends with `[^2]22` (in which case the `22` can be isolated). Then the string is checked against 5 different patterns. If it matches, then the string can be split after the first character of that match.  
 
 ```regexp
 21([^1])(?!\1)
@@ -88,34 +90,41 @@ My splitting implementation relies mostly on regular expressions. There's one ca
 [^123][123]
 ```
 
-That logic is then applied recursively on each side of the split string. It's not the most pretty approach, but it works.
+That logic is then applied recursively on each side of the split string. It is not the prettiest approach, but it works.
 
-One important detail for later is that this logic MUST NOT be applied on strings that have not been at least through two iterations of the look-and-say transformation. Without going into the details, that's because the initial string could be any string an the mathematical properties of the transformation only appear after applying it several times.
+One important detail for later is that this logic MUST NOT be applied on strings that have not been at least through **two** iterations of the look-and-say transformation (a.k.a. two-day strings). The initial string can be any string and the mathematical properties of the transformation only appear after applying it a couple of times.
 
 For example, the successors of `41111` are `1441` then `112411`. If we apply the split on the initial string then transform each half, we'll get `4.1111` then `14.41` and `1114.1411`. This shows that splitting too early does not guarantee that the substrings are independent. In this case, the split can be applied safely on day 2 as `112.4.11`.
 
 ### The chemistry of look-and-say
 
-This is where it gets crazy. Conway observed that applying the transformation enough times _always_ results a combination of strings taken from a finite set of 92 "elements". Amusingly, he gave them names from the periodic table, from Hydrogen to Uranium.
+This is where it gets crazy. Conway observed that the result of transforming and splitting a string many times follows a pattern. The resulting substrings are finite in number, 92 to be precise. Conway calls those _the common elements_. Amusingly, he gave them names from the periodic table, from Hydrogen to Uranium.
 
-_The Chemical Theorem_ is one of the major results of his research, and reads as follows:
+This is one of the major results of his research, and reads as follows:
 
+> _The Chemical Theorem_:
+>
 > 1. The descendents of any of the 92 elements in our Periodic Table are compounds of those elements.
 > 2. All sufficiently late descendents of any of these elements other than Hydrogen (`22`) involve **all** of the 92 elements simultaneously.
 > 3. The descendents of **any** string other than `""` (empty string) or `"22"` also ultimately involve all of those 92 elements simultaneously.
 > 4. These 92 elements are precisely the common elements as defined in [a table in the paper].
 
-On top of the 92 common elements (which are only built from digits 1, 2, and 3) there are two special elements with special digits:
+On top of the 92 common elements (which only contain the digits 1, 2, and 3) there are two special elements for the higher digits:
 
-> _The Transuranic Elements_: For each number n ≥ 4, we define two particular atoms:
+> _The Transuranic Elements_:
+>
+> For each number n ≥ 4, we define two particular atoms:
+>
 > * an isotope of **Plutonium** (Pu): `31221132221222112112322211n`
 > * an isotope of **Neptunium** (Np): `1311222113321132211221121332211n`
 
-The common elements plus all transuranic elements build the full _Cosmolgy_ of elements, which has a remarkable property — _The Cosmological Theorem_:
+The common elements plus all transuranic elements build the full _Cosmolgy_ of elements, which has a remarkable property:
 
+> _The Cosmological Theorem_:
+>
 > **Any** string decays into a compound of common and transuranic elements after a bounded number of derivation steps. […]
 
-This is a _very_ important result. It means that _every_ starting string will eventually be composed of sub-strings from a _finite_ set of elements (even if the length of said string grows exponentially). Since we are only interested in the _length_ of the string, this has massive consequences.
+This is a _very_ important result. It means that _every_ starting string will eventually be composed of sub-strings from a **finite** set of elements (even if the length of said string grows exponentially). Since we are only interested in the length of the string, this has massive consequences.
 
 Say we start with `12322211331222113112211` (which is element 40, Zirconium). Its descendents are:
 
@@ -125,9 +134,9 @@ Say we start with `12322211331222113112211` (which is element 40, Zirconium). It
     1321122112.13.22.3112.1113122113322113111221131221 (Rb.Pa.H.Ar.Nb)
     11131221222112.1113.22.132112.311311222.12322211331222113112211 (Kr.Th.H.Cl.Er.Zr)
 
-After 4 steps, we have a compound where our starting element Zirconium appears again. Therefore, instead of re-applying the calculation of its descendents and their lengths, we can re-use those we have already calculated! And, thanks to the theory, we know the same applies eventually to **every** element.
+After 4 steps, our starting element Zirconium appears again. Therefore, instead of re-applying the calculation to it, we can re-use the results we already have to compute the next lengths of that part of sub-string. And going that deep is not even necessary: the length of the descendent of Zr at depth `N > 0` is _always_ equal to the sum of the lengths of the descendents of Y, H, Ca, and Tc at depth `N - 1`. So we can apply the same thinking to those elements to build our results recursively.
 
-In this example, the length of the descendent of Zr at depth `N > 0` is _always_ equal to the sum of the lengths of the descendents of Y, H, Ca, and Tc at depth `N - 1`. By applying the same to all elements and storing enough results, we can theoretically compute the length of the descendent of anything at any depth pretty fast; at best in linear time.
+Thanks to the theory we know this applies to **every** string, and that there is a **bounded** number of elements to track. Therefore, by storing enough results we can theoretically compute the length of the descendent of anything at any depth pretty fast.
 
 ### Building the solution
 
@@ -143,9 +152,7 @@ def memoized_look_say_split(string):
     return split(look_and_say(string))
 ```
 
-This code may not look impressive, but it is essential to our solution. It takes a string as input, runs the transformation on it, then splits the result. Most importantly, it caches the result.
-
-Thanks to the theory we know that the number of different elements will be at least 92 and possibly slightly more is some cases, but always a finite number. So by making our cache large enough, we can make it so we only ever need to run the actual look and say transformation once per element!
+This code may not look impressive, but it is essential to our solution. It takes a string as input, runs the transformation on it, then splits the result. Most importantly, it caches the result: this means we only need to run the actual look and say transformation once per element!
 
 Now we can implement the core logic of our calculation:
 
@@ -169,9 +176,9 @@ def iter_look_and_say_lengths(string):
         yield recursive_lns_length(string, i)
 ```
 
-This is a generator that yields the length of the given string at each step of the process (starting with the unmodified input). It then computes the length one by one using an internal recursive function.
+This is a generator that yields the length of the given string at each step of the process (starting with the unmodified input). It then computes the lengths one by one using an internal recursive function.
 
-The inner `recursive_lns_cache` applies the transformation + split to the string, then builds its length at depth `n` by summing the length at depth `n - 1` of its descendents, recursively. To initialize (or terminate?) the recursion, it also returns its own length at depth `0`.
+The inner `recursive_lns_cache` transforms then splits the string, then computes its length at depth `n` by summing the lengths at depth `n - 1` of its direct descendents, calling itself recursively to do so. To initialize (or terminate?) the recursion, it also returns its own length at depth `0`.
 
 But surely this recursion grows uncontrollably, right? Each additional layer will require an exponential number of calls and our runtime will be poor, even if the look and say transformation is cached. And that would be correct, if it were not for one particular line of code.
 
@@ -191,7 +198,7 @@ def main(string):
 
     ./run_aoc.py 2015 10 -t
 
-The `-t` option enables timing on the runner. That should show you just how fast this solution is: 3 milliseconds to run both parts on my computer. This is around 1000× faster than before! Better even, its run time is not exponential and we can go much, much further in the sequence. In the time it took for our first solution to calculate the length of element 50 (3 seconds), I was able to compute the length of element _40,000_! Which is a ridiculous number that fills up my terminal screen with digits.
+The `-t` option enables timing on the runner. That should show you just how fast this solution is — 3 milliseconds to run both parts on my computer! This is around 1,000× faster than before! Even better: its run time is not exponential and we can go much, much further in the sequence. In the time it took for our first solution to compute the length of element 50 (3 seconds), I was able to compute the length of element _40,000_! Which happens to be a ridiculous number that fills up my terminal screen with digits.
 
 ### The nasty details
 
