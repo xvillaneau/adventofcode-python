@@ -2,7 +2,6 @@
 from typing import Tuple
 import re
 import numpy as np
-from libaoc import simple_main, files
 
 RE_CLAIM = re.compile(r"#(\d+) @ (\d+),(\d+): (\d+)x(\d+)")
 Claim = Tuple[int, int, int, int, int]
@@ -45,5 +44,6 @@ def count_overlap(claims_text, dim_x=1000, dim_y=1000):
     return overlaps.sum(), intact_id
 
 
-if __name__ == '__main__':
-    simple_main(2018, 3, files.read_lines, count_overlap, lambda _: '')
+def main(data):
+    claims = data.splitlines()
+    yield count_overlap(claims)

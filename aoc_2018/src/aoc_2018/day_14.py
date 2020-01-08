@@ -93,3 +93,7 @@ class StatePart2:
             else:
                 res.append(f' {n} ')
         return ''.join(res)
+
+
+def main(_: str):
+    yield None

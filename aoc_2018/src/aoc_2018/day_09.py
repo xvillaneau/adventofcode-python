@@ -1,7 +1,6 @@
 
 from collections import deque
 import re
-from libaoc import tuple_main, files
 
 
 class Game:
@@ -35,11 +34,7 @@ def main(game_input: str):
     # Run game for first rounf
     g = Game(players)
     g.play(max_val)
-    score_1 = max(g.scores)
+    yield max(g.scores)
     # Second run!
     g.play(max_val * 100)
-    return score_1, max(g.scores)
-
-
-if __name__ == '__main__':
-    tuple_main(2018, 9, files.read_full, main)
+    yield max(g.scores)

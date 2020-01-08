@@ -2,8 +2,6 @@
 from dataclasses import dataclass
 from typing import List, Tuple
 
-from libaoc import files, tuple_main
-
 TEST = "2 3 0 3 10 11 12 1 1 0 1 99 2 1 1 2"
 
 
@@ -35,10 +33,7 @@ def value(tree: Node) -> int:
                if 0 < m <= len(tree.children))
 
 
-def main(str_input: str):
-    tree, _ = parse_tree([int(n) for n in str_input.strip().split()])
-    return sum_metadata(tree), value(tree)
-
-
-if __name__ == '__main__':
-    tuple_main(2018, 8, files.read_full, main)
+def main(data: str):
+    tree, _ = parse_tree([int(n) for n in data.strip().split()])
+    yield sum_metadata(tree)
+    yield value(tree)

@@ -1,7 +1,6 @@
 
 from itertools import combinations
 from collections import Counter
-from libaoc import files, simple_main
 
 
 def count_checks(words):
@@ -19,5 +18,7 @@ def find_closest(words):
     return next(t for t in combinations(words, 2) if diff_words(*t) == 1)
 
 
-if __name__ == '__main__':
-    simple_main(2018, 2, files.read_lines, count_checks, find_closest)
+def main(data):
+    words = data.splitlines()
+    yield count_checks(words)
+    yield find_closest(words)
