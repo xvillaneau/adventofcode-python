@@ -52,12 +52,7 @@ def as_str(plants):
     return ''.join(map(['.', '#'].__getitem__, has_plants))
 
 
-def main(input_lines, generations=20):
-    filters, plants = parse_input(input_lines)
+def main(data: str, generations=20):
+    filters, plants = parse_input(data.splitlines())
     res = (many_gens(filters, plants, generations) + 1) // 2
-    return (res * (np.arange(len(res)) - 2 * generations)).sum()
-
-
-if __name__ == '__main__':
-    from libaoc import files, simple_main
-    simple_main(2018, 12, files.read_lines, main, len)
+    yield (res * (np.arange(len(res)) - 2 * generations)).sum()

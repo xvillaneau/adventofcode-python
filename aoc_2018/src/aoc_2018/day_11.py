@@ -17,18 +17,14 @@ def total_power(powers, square=3, print_size=False):
     return out_str, pow_sums.max()
 
 
-def best_square(sn: int):
+def main(data: int):
+    sn = int(data)
     powers = gen_powers(sn)
-    res_1 = total_power(powers)[0]
+    yield total_power(powers)[0]
 
     best_score, res_2 = 0, ""
     for square in range(1, 301):
         res, score = total_power(powers, square, print_size=True)
         if score > best_score:
             best_score, res_2 = score, res
-    return res_1, res_2
-
-
-if __name__ == '__main__':
-    from libaoc import tuple_main
-    tuple_main(2018, 11, lambda x, y: 6878, best_square)
+    yield res_2

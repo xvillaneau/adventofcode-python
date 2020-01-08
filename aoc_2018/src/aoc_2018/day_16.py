@@ -173,13 +173,9 @@ def run_program(program: List[RawOp], op_array: List[Operation]):
     return registers
 
 
-def main(full_input: str):
-    examples, program = parse_input(full_input)
+def main(data: str):
+    examples, program = parse_input(data)
     matches = [(ex.raw_op.op_num, try_example(ex)) for ex in examples]
+    yield sum(len(m) >= 3 for _, m in matches)
     result = run_program(program, match_opcodes(set(matches)))
-    return sum(len(m) >= 3 for _, m in matches), result[0]
-
-
-if __name__ == '__main__':
-    from libaoc import files, tuple_main
-    tuple_main(2018, 16, files.read_full, main)
+    yield result[0]

@@ -53,6 +53,5 @@ def parse_lines(lines):
     return np.array(positions, dtype=int), np.array(velocities, dtype=int)
 
 
-if __name__ == '__main__':
-    from libaoc import simple_main, files
-    simple_main(2018, 10, files.read_full, len, len)
+def main(_: str):
+    yield None

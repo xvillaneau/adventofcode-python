@@ -1,6 +1,5 @@
 
 from string import ascii_lowercase
-from libaoc import files, simple_main
 
 
 def reduce(polymer: str, ignored=frozenset([])):
@@ -22,5 +21,6 @@ def remove_and_reduce(polymer: str):
     return min(reduce(polymer, frozenset([c, c.upper()])) for c in ascii_lowercase)
 
 
-if __name__ == '__main__':
-    simple_main(2018, 5, files.read_full, reduce, remove_and_reduce)
+def main(data):
+    yield reduce(data)
+    yield remove_and_reduce(data)

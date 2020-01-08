@@ -1,7 +1,5 @@
-
-from functools import partial
 import numpy as np
-from libaoc import files, tuple_main
+from libaoc.parsers import parse_integer_table
 
 
 def point_distances(point, mat_size):
@@ -26,11 +24,12 @@ def score(territory):
     return 0 if (territory & border).any() else territory.sum()
 
 
-def main(points, safe_total=10000):
+def main(data: str, safe_total=10000):
     """
-    :param points: (nx2) matrix of all points, our puzzle input
+    :param data: (nx2) matrix of all points, our puzzle input (as text)
     :param safe_total: Safe total distance, for part 2
     """
+    points = parse_integer_table(data, delimiter=",")
     # Move points close to the axis
     moved_pts = points - points.min(axis=0)
     # Make 3D matrix where each layer is the distances to one point
@@ -41,10 +40,9 @@ def main(points, safe_total=10000):
     # Generate a bool map of places that have more than one closest point
     equidistant = (np.repeat(closest_dist[np.newaxis], len(points), 0) == distances).sum(axis=0) > 1
     # Calculate the size of the largest finite region
-    largest_region = max(score((territories == i) & ~equidistant) for i in range(len(points)))
+    yield max(score((territories == i) & ~equidistant) for i in range(len(points)))
     # Calculate how many places have a safe "total distance" to all points
-    num_safe = (distances.sum(axis=0) < safe_total).sum()
-    return largest_region, num_safe
+    yield (distances.sum(axis=0) < safe_total).sum()
 
 
 TEST = np.array([
@@ -54,6 +52,3 @@ TEST = np.array([
     [3, 4],
     [5, 5],
     [8, 9]])
-
-if __name__ == '__main__':
-    tuple_main(2018, 6, partial(files.read_int_table, delimiter=','), main)

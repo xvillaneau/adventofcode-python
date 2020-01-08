@@ -195,7 +195,7 @@ def game(full_input: str):
     return rounds, (elves if elves else goblins)
 
 
-def main(full_input: str):
-    rounds, winners = game(full_input)
+def main(data: str):
+    rounds, winners = game(data)
     score = sum(s.health for s in winners)
-    return rounds * score, ''
+    yield rounds * score

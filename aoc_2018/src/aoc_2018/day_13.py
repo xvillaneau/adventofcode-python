@@ -44,7 +44,7 @@ class Cart(Walker2D):
             self.crossing_status += 1
             self.crossing_status %= 3
         elif grid_chr in r'\/':
-            if (self._dir in (Direction.Up, Direction.Down)) == (grid_chr == '/'):
+            if (self.direction in (Direction.Up, Direction.Down)) == (grid_chr == '/'):
                 self.rot_left()
             else:
                 self.rot_right()
@@ -121,6 +121,7 @@ def last_remaining(lines):
             return f'{y},{x}'
 
 
-if __name__ == '__main__':
-    from libaoc import simple_main, files
-    simple_main(2018, 13, files.read_lines, first_collision, last_remaining)
+def main(data: str):
+    lines = data.splitlines()
+    yield first_collision(lines)
+    yield last_remaining(lines)

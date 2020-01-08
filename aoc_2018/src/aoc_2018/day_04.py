@@ -5,7 +5,6 @@ import re
 from typing import Tuple, Union
 
 import numpy as np
-from libaoc import files, tuple_main
 
 RE_LINE = re.compile(r'\[(.*)\] (.*)')
 RE_GUARD = re.compile(r'Guard #(\d+) begins shift')
@@ -51,12 +50,9 @@ def parse_schedule(lines):
     return asleep_times
 
 
-def most_asleep(lines):
-    schedule = parse_schedule(lines)
+def main(data):
+    schedule = parse_schedule(data.splitlines())
     most_times = max(schedule, key=lambda l: l[1:].sum())
     most_total_line, most_total_min = divmod(schedule[:, 1:].argmax(), 60)
-    return (most_times[0] * most_times[1:].argmax(), schedule[most_total_line, 0] * most_total_min)
-
-
-if __name__ == '__main__':
-    tuple_main(2018, 4, files.read_lines, most_asleep)
+    yield most_times[0] * most_times[1:].argmax()
+    yield schedule[most_total_line, 0] * most_total_min

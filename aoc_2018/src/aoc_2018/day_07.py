@@ -3,7 +3,6 @@ from dataclasses import dataclass
 from collections import defaultdict
 import re
 from typing import Union
-from libaoc import tuple_main, files
 
 RE_DEPENDENCY = re.compile('Step ([A-Z]) must be finished before step ([A-Z]) can begin.')
 
@@ -82,9 +81,7 @@ def multi_run(lines, workers=5, delay=60):
     return ''.join(done), time
 
 
-def main(lines):
-    return multi_run(lines, 1, -1)[0], multi_run(lines)[1]
-
-
-if __name__ == '__main__':
-    tuple_main(2018, 7, files.read_lines, main)
+def main(data: str):
+    lines = data.splitlines()
+    yield multi_run(lines, 1, -1)[0]
+    yield multi_run(lines)[1]
