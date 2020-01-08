@@ -1,42 +1,26 @@
-from collections import defaultdict
 from itertools import islice
-from typing import Iterator, Iterable
-
-from libaoc.vectors import Vect2D
+from typing import Iterable
 
 
-def follow_instructions(instructions: Iterable[str]) -> Iterator[Vect2D]:
-    pos = Vect2D(0, 0)
-    moves = {'^': Vect2D.up, 'v': Vect2D.down, '>': Vect2D.right, '<': Vect2D.left}
-    yield pos
-    for instr in instructions:
-        pos = moves[instr](pos)
-        yield pos
-
-def house_visits(instructions: Iterable[str]):
-    houses = defaultdict(int)
-    for pos in follow_instructions(instructions):
-        houses[pos] += 1
-    return houses
-
-def count_one_visit(instructions: str):
-    return len(house_visits(instructions.strip()))
-
-def count_robosanta_visits(instructions: str):
-    santa = house_visits(islice(instructions.strip(), 0, None, 2))
-    robot = house_visits(islice(instructions.strip(), 1, None, 2))
-    return len(santa.keys() | robot.keys())
-
-def test_count_visits():
-    assert count_one_visit('>') == 2
-    assert count_one_visit('^>v<') == 4
-    assert count_one_visit('^v^v^v^v^v') == 2
-
-    assert count_robosanta_visits('^v') == 3
-    assert count_robosanta_visits('^>v<') == 3
-    assert count_robosanta_visits('^v^v^v^v^v') == 11
+def house_visits(moves: Iterable[str]):
+    visited, pos = {0}, 0
+    for move in moves:
+        if move == "^":
+            pos += 128
+        elif move == "v":
+            pos -= 128
+        elif move == ">":
+            pos += 1
+        else:  # <
+            pos -= 1
+        visited.add(pos)
+    return visited
 
 
 def main(data: str):
-    yield count_one_visit(data)
-    yield count_robosanta_visits(data)
+    moves = data.strip()
+    yield len(house_visits(moves))
+
+    santa = house_visits(islice(moves, 0, None, 2))
+    robot = house_visits(islice(moves, 1, None, 2))
+    yield len(santa | robot)
