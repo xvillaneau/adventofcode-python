@@ -1,22 +1,14 @@
-
-from libaoc import simple_main, files
-
-
-def changes(lines):
-    return sum(map(int, lines))
+from itertools import accumulate, cycle
 
 
-def visited_twice(lines):
-    deltas = list(map(int, lines))
-    visited, freq = {0}, 0
+def main(data):
+    deltas = [int(line) for line in data.splitlines()]
 
-    while True:
-        for delta in deltas:
-            freq += delta
-            if freq in visited:
-                return freq
-            visited.add(freq)
+    yield sum(deltas)
 
-
-if __name__ == '__main__':
-    simple_main(2018, 1, files.read_lines, changes, visited_twice)
+    visited = {0}
+    for freq in accumulate(cycle(deltas)):
+        if freq in visited:
+            yield freq
+            return
+        visited.add(freq)
