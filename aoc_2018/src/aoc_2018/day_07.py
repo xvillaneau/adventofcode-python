@@ -1,87 +1,89 @@
-
 from dataclasses import dataclass
 from collections import defaultdict
-import re
-from typing import Union
-
-RE_DEPENDENCY = re.compile('Step ([A-Z]) must be finished before step ([A-Z]) can begin.')
-
-TEST = """
-Step C must be finished before step A can begin.
-Step C must be finished before step F can begin.
-Step A must be finished before step B can begin.
-Step A must be finished before step D can begin.
-Step B must be finished before step E can begin.
-Step D must be finished before step E can begin.
-Step F must be finished before step E can begin.
-""".strip().splitlines()
+from heapq import heappop, heappush
+from typing import Dict, List, Set
 
 
-def read_deps(lines):
+def read_dependencies(lines) -> Dict[str, Set[str]]:
     deps = defaultdict(set)
     all_steps = set([])
-    for l in lines:
-        depends, dependent = RE_DEPENDENCY.search(l).groups()
+
+    for line in lines:
+        depends, dependent = line[5], line[36]
         deps[dependent].add(depends)
         all_steps |= {depends, dependent}
+
     for first_step in all_steps - set(deps):
         deps[first_step] = set([])
     return dict(deps)
 
 
+def update_dependencies(dependencies, frontier, value: str = ""):
+    visited = []
+    for key, deps in dependencies.items():
+        deps.discard(value)
+        if not deps:
+            heappush(frontier, key)
+            visited.append(key)
+    for key in visited:
+        dependencies.pop(key)
+
+
+def solve_steps(lines: List[str]):
+    dependencies = read_dependencies(lines)
+    frontier, sequence = [],  ""
+
+    update_dependencies(dependencies, frontier)
+    while frontier:
+        step = heappop(frontier)
+        sequence += step
+        update_dependencies(dependencies, frontier, step)
+
+    return sequence
+
+
 @dataclass
 class Worker:
-    step: Union[str, None]
-    remaining: int
+    work: str = ""
+    remaining: int = 0
 
 
 def multi_run(lines, workers=5, delay=60):
 
-    deps = read_deps(lines)
-    workers = [Worker(None, 0) for _ in range(workers)]
-    done, time = [], 0
+    dependencies = read_dependencies(lines)
+    workers = [Worker() for _ in range(workers)]
+    time, frontier = 0, []
 
-    while True:
+    update_dependencies(dependencies, frontier)
 
-        # Check work done, free the workers
-        done_now, in_progress = set([]), set([])
-        for w in workers:
-            if w.remaining > 0:
-                in_progress.add(w.step)
-            elif w.step is not None:
-                done_now.add(w.step)
-                deps.pop(w.step)
-                w.step = None
+    while frontier or dependencies:
 
-        # Add the done work to the output, check for end of process
-        done.extend(sorted(done_now))
-        if not in_progress and not deps:
-            break
+        # Check for work that was just finished
+        for worker in workers:
+            if worker.work and not worker.remaining:
+                update_dependencies(dependencies, frontier, worker.work)
+                worker.work = ""
 
-        # Give work to workers
-        todo = {c for c, d in deps.items() if not d - set(done)} - in_progress
-        for w in workers:
-            if not todo:
+        # Assign work to the available workers
+        for worker in workers:
+            if not frontier:
                 break
-            if w.step is not None:
-                continue
-            w.step = min(todo)
-            todo.remove(w.step)
-            if delay >= 0:
-                w.remaining = delay + ord(w.step) - 64
-            else:
-                w.remaining = 1
+            if not worker.work:
+                step = heappop(frontier)
+                worker.work = step
+                worker.remaining = delay + ord(step) - 64
 
-        # Update the timers
-        for w in workers:
-            if w.remaining > 0:
-                w.remaining -= 1
-        time += 1
+        # Jump straight to the next time where work gets completed
+        jump = min(w.remaining for w in workers if w.work)
+        time += jump
+        for worker in workers:
+            if worker.work:
+                worker.remaining -= jump
 
-    return ''.join(done), time
+    return time
 
 
 def main(data: str):
     lines = data.splitlines()
-    yield multi_run(lines, 1, -1)[0]
-    yield multi_run(lines)[1]
+    yield solve_steps(lines)
+    yield multi_run(lines)
