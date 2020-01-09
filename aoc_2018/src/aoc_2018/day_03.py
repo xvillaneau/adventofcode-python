@@ -1,49 +1,27 @@
-
-from typing import Tuple
+from typing import List, Tuple
 import re
 import numpy as np
 
 RE_CLAIM = re.compile(r"#(\d+) @ (\d+),(\d+): (\d+)x(\d+)")
-Claim = Tuple[int, int, int, int, int]
-
-TEST = ['#1 @ 1,3: 4x4',
-        '#2 @ 3,1: 4x4',
-        '#3 @ 5,5: 2x2']
+Claim = Tuple[int, slice, slice]
 
 
-def parse_claim(line) -> Tuple[int, int, int, int, int]:
-    match = RE_CLAIM.search(line)
-    if not match:
-        raise ValueError(line)
-    return tuple(map(int, match.groups()))
+def parse_claim(line: str) -> Claim:
+    n, x0, y0, dx, dy = RE_CLAIM.fullmatch(line).groups()
+    slice_x = slice(x0 := int(x0), x0 + int(dx))
+    slice_y = slice(y0 := int(y0), y0 + int(dy))
+    return n, slice_x, slice_y
 
 
-def claim_to_mat(claim: Claim, max_x=1000, max_y=1000):
-    _, off_x, off_y, dim_x, dim_y = claim
-    ones = np.ones((dim_x, dim_y))
-    return np.pad(ones, ((off_x, max_x - off_x - dim_x), (off_y, max_y - off_y - dim_y)), 'constant')
+def overlap_claims(claims: List[Claim], dim=(1000, 1000)):
+    fabric = np.zeros(dim, dtype=int)
+    for _, sx, sy in claims:
+        fabric[sx, sy] += 1
+    return fabric
 
 
-def pos_in_claim(pos: Tuple[int, int], claim: Claim):
-    _, off_x, off_y, dim_x, dim_y = claim
-    x, y = pos
-    return off_x <= x < off_x + dim_x and off_y <= y < off_y + dim_y
-
-
-def count_overlap(claims_text, dim_x=1000, dim_y=1000):
-    claims = list(parse_claim(l) for l in claims_text)
-    claim_mats = {c[0]: claim_to_mat(c, dim_x, dim_y) for c in claims}
-    overlaps = sum(claim_mats.values()) >= 2
-
-    intact_id = object()
-    for c_id, c_mat in claim_mats.items():
-        if not (c_mat * overlaps).any():
-            intact_id = c_id
-            break
-
-    return overlaps.sum(), intact_id
-
-
-def main(data):
-    claims = data.splitlines()
-    yield count_overlap(claims)
+def main(data: str):
+    claims = [parse_claim(line) for line in data.splitlines()]
+    overlap = overlap_claims(claims)
+    yield np.sum(overlap >= 2)
+    yield next(n for n, sx, sy in claims if np.all(overlap[sx, sy] == 1))
