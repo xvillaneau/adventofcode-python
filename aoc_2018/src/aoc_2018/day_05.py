@@ -1,24 +1,21 @@
-
 from string import ascii_lowercase
 
 
-def reduce(polymer: str, ignored=frozenset([])):
+def reduce(polymer: str, ignored=""):
     stack = []
-    for c in polymer:
-        if c in ignored:
+    for char in polymer:
+        if char in ignored:
             continue
-        if not stack:
-            stack.append(c)
-            continue
-        if c.lower() == stack[-1].lower() and c != stack[-1]:
+        n = ord(char)
+        if stack and n ^ 32 == stack[-1]:
             stack.pop()
         else:
-            stack.append(c)
+            stack.append(n)
     return len(stack)
 
 
 def remove_and_reduce(polymer: str):
-    return min(reduce(polymer, frozenset([c, c.upper()])) for c in ascii_lowercase)
+    return min(reduce(polymer, c + c.upper()) for c in ascii_lowercase)
 
 
 def main(data):
