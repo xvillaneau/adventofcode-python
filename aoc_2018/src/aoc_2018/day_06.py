@@ -9,19 +9,7 @@ def point_distances(point, mat_size):
     :return: Matrix with the block distances to the point
     """
     (x, y), (mx, my) = point, mat_size
-    sx = np.repeat(np.arange(mx+1)[np.newaxis] - x, my+1, 0).transpose()
-    sy = np.repeat(np.arange(my+1)[np.newaxis] - y, mx+1, 0)
-    return abs(sx) + abs(sy)
-
-
-def score(territory):
-    """
-    :param territory: bool matrix showing the "territory" of a point
-    :return: Score of a point's "territory", which is its size unless it's infinite
-    """
-    border = np.ones(territory.shape, dtype=int)
-    border[1:-1, 1:-1] = 0
-    return 0 if (territory & border).any() else territory.sum()
+    return np.sum(abs(np.mgrid[-x : mx - x + 1, -y : my - y + 1]), axis=0)
 
 
 def main(data: str, safe_total=10000):
@@ -29,26 +17,27 @@ def main(data: str, safe_total=10000):
     :param data: (nx2) matrix of all points, our puzzle input (as text)
     :param safe_total: Safe total distance, for part 2
     """
+    # Parse the points, move their coordinates closer to the axis
     points = parse_integer_table(data, delimiter=",")
-    # Move points close to the axis
-    moved_pts = points - points.min(axis=0)
+    points -= np.min(points, axis=0) - 1
+    max_size = np.max(points, axis=0) + 1
+
     # Make 3D matrix where each layer is the distances to one point
-    distances = np.array([point_distances(p, moved_pts.max(axis=0)) for p in moved_pts])
-    # Get respectively the map of distances to the nearest point,
-    # and the maps of ID of the corresponding layer (aka territories)
-    closest_dist, territories = distances.min(axis=0), distances.argmin(axis=0)
+    distances = np.array([point_distances(p, max_size) for p in points])
+
+    # Transform that 3D matrix into booleans planes where True means
+    # that the point on that place (on of) the closest
+    closest = distances == np.min(distances, axis=0)
+
     # Generate a bool map of places that have more than one closest point
-    equidistant = (np.repeat(closest_dist[np.newaxis], len(points), 0) == distances).sum(axis=0) > 1
+    equidistant = np.sum(closest, axis=0) > 1
+    closest &= ~equidistant
+
     # Calculate the size of the largest finite region
-    yield max(score((territories == i) & ~equidistant) for i in range(len(points)))
+    border = np.pad(np.zeros(max_size - 1, dtype=int), 1, constant_values=1)
+    on_border = np.any(closest & border, axis=(1, 2))
+    scores = np.sum(closest, axis=(1, 2)) * ~on_border
+    yield np.max(scores)
+
     # Calculate how many places have a safe "total distance" to all points
-    yield (distances.sum(axis=0) < safe_total).sum()
-
-
-TEST = np.array([
-    [1, 1],
-    [1, 6],
-    [8, 3],
-    [3, 4],
-    [5, 5],
-    [8, 9]])
+    yield np.sum(np.sum(distances, axis=0) < safe_total)
