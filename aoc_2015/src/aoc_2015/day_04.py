@@ -1,26 +1,30 @@
 from itertools import count
 from hashlib import md5
+from multiprocessing import Pool
+
+SIZE = 10000
 
 
-def code_hash(base, number: int) -> int:
-    full_hash = base.copy()
-    full_hash.update(str(number).encode())
-    return int.from_bytes(full_hash.digest()[:3], "big")
+def code_hash_batch(params):
+    key, limit, batch_start, batch_size = params
+    base = md5(key)
+    for i in range(batch_start, batch_start + batch_size):
+        full_hash = base.copy()
+        full_hash.update(str(i).encode())
+        head = int.from_bytes(full_hash.digest()[:3], "big")
+        if head <= limit:
+            return i
+    return -1
 
 
-def coin_mine_5(base):
-    return next(i for i in count(1) if code_hash(base, i) < 16)
-
-
-def coin_mine_6(base):
-    return next(i for i in count(1) if code_hash(base, i) == 0)
-
-
-def test_mine():
-    assert coin_mine_5(md5(b'abcdef')) == 609043
+def find_hash_pool(key, lim):
+    with Pool() as pool:
+        params = ((key, lim, start, SIZE) for start in count(1, SIZE))
+        results = pool.imap(code_hash_batch, params)
+        return next(i for i in results if i >= 0)
 
 
 def main(data: str):
-    base = md5(data.encode())
-    yield coin_mine_5(base)
-    yield coin_mine_6(base)
+    key = data.encode()
+    yield find_hash_pool(key, 15)
+    yield find_hash_pool(key, 0)
