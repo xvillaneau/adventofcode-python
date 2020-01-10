@@ -1,6 +1,6 @@
 import numpy as np
 
-from libaoc.matrix import convolve_2d_3x3, load_string_matrix
+from libaoc.matrix import convolve_2d, load_string_matrix
 
 WEIGHTS = 2 ** np.arange(25)
 FILTER = np.array([[0, 1, 0], [1, 0, 1], [0, 1, 0]])
@@ -16,7 +16,7 @@ def load_bugs(data: str):
 
 
 def step(bugs):
-    neighbors = convolve_2d_3x3(bugs, FILTER)
+    neighbors = convolve_2d(bugs, FILTER)
     one_adj, two_adj = neighbors == 1, neighbors == 2
     bugs_alive = bugs & one_adj
     infected = (~bugs) & (one_adj | two_adj)
@@ -36,7 +36,7 @@ def first_repeat(bugs):
 
 
 def recursive_step(bugs, inner=None, outer=None):
-    neighbors = convolve_2d_3x3(bugs, FILTER)
+    neighbors = convolve_2d(bugs, FILTER)
 
     if inner is not None:
         neighbors[1, 2] += np.sum(inner[0, :])

@@ -5,7 +5,7 @@ from typing import Dict, Iterator, Tuple
 import numpy as np
 
 from libaoc.graph import HWeightedGraph, build_graph
-from libaoc.matrix import convolve_2d_3x3
+from libaoc.matrix import convolve_2d
 from libaoc.vectors import Vect2D, UP, LEFT, DOWN, RIGHT, UNIT_VECTORS
 
 Portal = Tuple[str, bool]
@@ -24,7 +24,7 @@ def find_portals(maze):
 
     portals = []
     for i, v in enumerate((RIGHT, UP, LEFT, DOWN)):
-        coords = np.argwhere(convolve_2d_3x3(walls, np.rot90(pattern, i)) == 4)
+        coords = np.argwhere(convolve_2d(walls, np.rot90(pattern, i)) == 4)
         for x, y in coords:
             label = "".join(maze[x - 1 : x + 2, y - 1 : y + 2].reshape(9))
             label = re.sub(r"[\s#.]", "", label)
