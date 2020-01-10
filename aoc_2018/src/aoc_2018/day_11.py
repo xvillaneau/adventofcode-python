@@ -1,30 +1,41 @@
-
 import numpy as np
 
-
-def gen_powers(sn: int):
-    y_coords = np.repeat(np.arange(300)[np.newaxis], 300, 0) + 1
-    x_coords = y_coords.transpose()
-    rack_ids = x_coords + 10
-    return ((((rack_ids * y_coords + sn) * rack_ids) // 100) % 10) - 5
+from libaoc.matrix import convolve_2d
 
 
-def total_power(powers, square=3, print_size=False):
-    # TODO: Fix me
-    pow_sums = convolve(powers, np.ones((square, square), dtype=int), mode='valid')
-    x, y = divmod(pow_sums.argmax(), (300 - square + 1))
-    out_str = f'{x+1},{y+1},{square}' if print_size else f'{x+1},{y+1}'
-    return out_str, pow_sums.max()
+def make_power_levels(serial_number: int):
+    coords = np.mgrid[1:301][:, np.newaxis]
+    power_levels = (coords + 10) @ coords.transpose()
+    power_levels += serial_number
+    power_levels *= coords + 10
+    power_levels //= 100
+    power_levels %= 10
+    power_levels -= 5
+    return power_levels
+
+
+def total_power(power_levels, square=3):
+    power_sums = convolve_2d(power_levels, np.ones((square, square), dtype=int), 0)
+    x, y = np.unravel_index(power_sums.argmax(), power_sums.shape)
+    return x + 1, y + 1, power_sums[x, y]
+
+
+def best_square(power_levels):
+    # TODO: Very slow, find ways to optimize
+    best_score, best_result = 0, (0, 0, 0)
+    for square in range(1, 301):
+        x, y, score = total_power(power_levels, square)
+        if score > best_score:
+            best_result = x, y, square
+            best_score = score
+    return best_result
 
 
 def main(data: int):
-    sn = int(data)
-    powers = gen_powers(sn)
-    yield total_power(powers)[0]
+    powers = make_power_levels(int(data))
+    x1, y1, _ = total_power(powers)
+    yield f"{x1},{y1}"
 
-    best_score, res_2 = 0, ""
-    for square in range(1, 301):
-        res, score = total_power(powers, square, print_size=True)
-        if score > best_score:
-            best_score, res_2 = score, res
-    yield res_2
+    yield "Part 2 is too slow, fix it!"
+    # x2, y2, s2 = best_square(powers)
+    # yield f"{x2},{y2},{s2}"
