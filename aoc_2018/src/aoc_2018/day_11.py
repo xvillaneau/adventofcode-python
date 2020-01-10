@@ -21,13 +21,14 @@ def total_power(power_levels, square=3):
 
 
 def best_square(power_levels):
-    # TODO: Very slow, find ways to optimize
     best_score, best_result = 0, (0, 0, 0)
     for square in range(1, 301):
         x, y, score = total_power(power_levels, square)
         if score > best_score:
             best_result = x, y, square
             best_score = score
+        if score < 0:
+            break
     return best_result
 
 
@@ -36,6 +37,5 @@ def main(data: int):
     x1, y1, _ = total_power(powers)
     yield f"{x1},{y1}"
 
-    yield "Part 2 is too slow, fix it!"
-    # x2, y2, s2 = best_square(powers)
-    # yield f"{x2},{y2},{s2}"
+    x2, y2, s2 = best_square(powers)
+    yield f"{x2},{y2},{s2}"
