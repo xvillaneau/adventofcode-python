@@ -1,8 +1,8 @@
-
 import re
+
 import numpy as np
 
-RE_LINE = re.compile(r'position=<\s*(-?\d+),\s*(-?\d+)>\s*velocity=<\s*(-?\d+),\s*(-?\d+)>')
+RE_VECT = re.compile(r'<\s*(-?\d+),\s*(-?\d+)>')
 
 TEST = """
 position=< 9,  1> velocity=< 0,  2>
@@ -36,22 +36,52 @@ position=<-6,  0> velocity=< 2,  0>
 position=< 5,  9> velocity=< 1, -2>
 position=<14,  7> velocity=<-2,  0>
 position=<-3,  6> velocity=< 2, -1>
-""".strip().splitlines()
+""".strip()
 
 
-def parse_line(line):
-    px, py, vx, vy = RE_LINE.search(line).groups()
-    return [int(px), int(py)], [int(vx), int(vy)]
+def parse_data(data: str):
+
+    def parse_line(line):
+        (x, y), (vx, vy) = RE_VECT.findall(line)
+        return (int(x), int(y)), (int(vx), int(vy))
+
+    data = np.array([parse_line(line) for line in data.splitlines()])
+    return data[:, 0], data[:, 1]
 
 
-def parse_lines(lines):
-    positions, velocities = [], []
-    for l in lines:
-        p, v = parse_line(l)
-        positions.append(p)
-        velocities.append(v)
-    return np.array(positions, dtype=int), np.array(velocities, dtype=int)
+def detect_message(data: str):
+    pos, vel = parse_data(data)
+
+    _ind = np.nonzero(vel)
+    num = int(round(-np.average(pos[_ind] / vel[_ind])))
+
+    a, b, c = (score(pos, vel, num + i) for i in (-1, 0, 1))
+    while a < b or c < b:
+        if a < b:
+            num -= 1
+            b, c = a, b
+            a = score(pos, vel, num - 1)
+        else:
+            num += 1
+            a, b = b, c
+            c = score(pos, vel, num + 1)
+
+    return pos + vel * num, num
 
 
-def main(_: str):
-    yield None
+def render_message(points):
+    points -= np.min(points, axis=0)
+    text = np.full(np.max(points, axis=0) + 1, " ")
+    text[tuple(points.transpose())] = "#"
+    return "\n".join("".join(line) for line in text.transpose())
+
+
+def score(pos, vel, num):
+    pos = pos + vel * num
+    return np.sum(np.max(pos, axis=0) - np.min(pos, axis=0))
+
+
+def main(data: str):
+    points, steps = detect_message(data)
+    yield "\n" + render_message(points)
+    yield steps
