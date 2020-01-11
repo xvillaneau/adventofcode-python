@@ -14,12 +14,10 @@ class Vect2D:
         if isinstance(other, tuple):
             # Hash of a given Vect2D is equal to that of the tuple of
             # its coordinates, therefore we MUST implement equality too
-            if len(other) != 2:
-                return False
-            return tuple(self) == other
+            return (self.x, self.y) == other
         if isinstance(other, Vect2D):
             return self.x == other.x and self.y == other.y
-        return False
+        return NotImplemented
 
     def __neg__(self):
         return self * -1
