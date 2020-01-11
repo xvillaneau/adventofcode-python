@@ -1,52 +1,18 @@
 from dataclasses import dataclass
+from heapq import heappop, heappush
 from typing import Tuple, List
+
 import numpy as np
+from scipy import ndimage
 
-TEST_1 = """
-#######
-#.G...#
-#...EG#
-#.#.#G#
-#..G#E#
-#.....#
-#######
-"""
-
-TEST_2 = """
-#######
-#G..#E#
-#E#E.E#
-#G.##.#
-#...#E#
-#...E.#
-#######
-"""
-
-TEST_3 = """
-#######
-#E..EG#
-#.#G.E#
-#E.##E#
-#G..#.#
-#..E#.#
-#######
-"""
-
-TEST_4 = """
-#######
-#E.G#.#
-#.#G..#
-#G.#.G#
-#G..#.#
-#...E.#
-#######
-"""
+from libaoc.matrix import load_string_matrix
 
 Pos = Tuple[int, int]
+ELF, GOBLIN = "elf", "goblin"
 
 
 @dataclass
-class Soldier:
+class Player:
     x: int
     y: int
     clan: str
@@ -57,145 +23,163 @@ class Soldier:
     def pos(self):
         return self.x, self.y
 
-
-class CannotMove(Exception):
-    pass
-
-
-class EndOfBattle(Exception):
-    pass
+    def move(self, pos: Pos):
+        self.x, self.y = pos
 
 
-def parse_map(map_str: str):
-    """From an input text map, generate the playable areas and the players"""
-    chars_mat = np.array([list(l) for l in map_str.strip().splitlines()])
-    playable = chars_mat != '#'
-    elves = [Soldier(x, y, 'elf') for x, y in zip(*np.nonzero(chars_mat == 'E'))]
-    goblins = [Soldier(x, y, 'goblin') for x, y in zip(*np.nonzero(chars_mat == 'G'))]
-    return playable, elves, goblins
+class Game:
+    def __init__(self, map_str, elf_atk=3):
+        chars_mat = load_string_matrix(map_str)
+        self.playable = chars_mat != '#'
+        self.rounds = 0
+
+        elves = [Player(x, y, ELF, elf_atk) for x, y in np.argwhere(chars_mat == 'E')]
+        goblins = [Player(x, y, GOBLIN) for x, y in np.argwhere(chars_mat == 'G')]
+        self.players = elves + goblins
+        self._goblin_id = len(elves)
+        self._n_elves, self._n_goblins = len(elves), len(goblins)
+
+    @property
+    def elves(self):
+        return [p for p in self.players[:self._goblin_id] if p.health > 0]
+
+    @property
+    def goblins(self):
+        return [p for p in self.players[self._goblin_id:] if p.health > 0]
+
+    @property
+    def score(self):
+        return self.rounds * sum(p.health for p in self.players if p.health > 0)
+
+    @property
+    def ordered_players(self):
+        players = self.players
+        ids = range(len(players))
+        ids = sorted(ids, key=lambda i: players[i].pos)
+        return list(ids)
+
+    @property
+    def complete(self):
+        return self._n_elves == 0 or self._n_goblins == 0
+
+    def elves_mat(self):
+        return player_map(self.playable.shape, self.elves)
+
+    def goblins_mat(self):
+        return player_map(self.playable.shape, self.goblins)
+
+    def show_state(self, health=False):
+        indices = ~self.playable * 1 + self.elves_mat() * 2 + self.goblins_mat() * 3
+        full_map = np.choose(indices, ('.', '#', 'E', 'G'))
+        if not health:
+            lines = (''.join(line) for line in full_map)
+        else:
+            lines = []
+            for x, line in enumerate(full_map):
+                line = "".join(line)
+                on_line = [p for p in self.players if p.x == x]
+                on_line.sort(key=lambda p: p.y)
+                players = ", ".join(
+                    f"{p.clan[0].upper()}({p.health})"
+                    for p in on_line
+                    if p.health > 0
+                )
+                lines.append(line + "   " + players)
+        return "\n".join(lines)
+
+    def __str__(self):
+        """Generate a fancy visualization of how the battle is doing"""
+        return self.show_state()
+
+    def next_move(self, player_id: int):
+        player = self.players[player_id]
+        if player.health <= 0:
+            return player.pos
+
+        goblins, elves = self.goblins_mat(), self.elves_mat()
+        enemies = goblins if player.clan == ELF else elves
+
+        start_pos = player.pos
+        attack_ranges = ndimage.binary_dilation(enemies)
+        if attack_ranges[start_pos]:
+            return start_pos
+
+        free = self.playable & ~goblins & ~elves
+        frontier, visited = [], set()
+        for first_step in neighbors(start_pos):
+            if not free[first_step]:
+                continue
+            heappush(frontier, (1, first_step, first_step))
+            visited.add(first_step)
+
+        while frontier:
+            steps, first_pos, pos = heappop(frontier)
+            if attack_ranges[pos]:
+                return first_pos
+            for next_pos in neighbors(pos):
+                if next_pos in visited or not free[next_pos]:
+                    continue
+                visited.add(next_pos)
+                heappush(frontier, (steps + 1, first_pos, next_pos))
+
+        return start_pos
+
+    def play_turn(self, player_id: int, allow_elf_death=True):
+        player = self.players[player_id]
+        next_move = self.next_move(player_id)
+
+        player.move(next_move)
+
+        enemies = self.goblins if player.clan == ELF else self.elves
+        adjacent_pos = set(neighbors(player.pos))
+
+        targets = [p for p in enemies if p.pos in adjacent_pos]
+        if not targets:
+            return True
+
+        target = min(targets, key=lambda p: (p.health, p.pos))
+        target.health -= player.attack
+
+        if target.health <= 0:  # Target down
+            if target.clan == ELF:
+                if not allow_elf_death:
+                    return False
+                self._n_elves -= 1
+            else:
+                self._n_goblins -= 1
+
+        return True
+
+    def play(self, allow_elf_death=True):
+        while True:
+            round_order = self.ordered_players
+            for player_id in round_order:
+                if self.complete:
+                    return
+                if self.players[player_id].health <= 0:
+                    continue
+                self.play_turn(player_id, allow_elf_death)
+            self.rounds += 1
 
 
-def print_battle(playable, elves, goblins):
-    """Generate a fancy visualization of how the battle is doing"""
-    chars = ('.', '#', 'E', 'G')
-    m_elves = mat_from_soldiers(playable, elves)
-    m_goblins = mat_from_soldiers(playable, goblins)
-    return '\n'.join(''.join(map(chars.__getitem__, l))
-                     for l in ~playable * 1 + m_elves * 2 + m_goblins * 3)
+def player_map(shape, players: List[Player]):
+    pos_ind = np.array([p.pos for p in players]).transpose()
+    if not np.any(pos_ind):
+        return np.full(shape, False)
+    int_ind = np.ravel_multi_index(pos_ind, shape)
+    np.put(mat := np.full(shape, False), int_ind, True)
+    return mat
 
 
-def mat_from_soldiers(playable, soldiers: List[Soldier]):
-    out = np.full(playable.shape, False)
-    for soldier in soldiers:
-        out[soldier.x, soldier.y] = True
-    return out
-
-
-# TODO: Fix me
-
-def reach_steps(free, pos: Pos, *, limit=None):
-
-    if limit is None:
-        lx, ly = free.shape
-        limit = lx * ly
-
-    steps = np.full(free.shape, -1)
-    border = np.full(free.shape, False)
-    n_steps = 0
+def neighbors(pos: Tuple[int, int]):
     x, y = pos
-    border[x, y] = True
-    while border.any() and n_steps <= limit:
-        ix, iy = np.where(border)
-        steps[ix, iy] = n_steps
-        n_steps += 1
-        border = ndimage.binary_dilation(border) & (steps == -1) & free
-    return steps
-
-
-def all_target_range(playable, allies, enemies):
-    free = playable & ~allies & ~enemies
-    return ndimage.binary_dilation(enemies) & free
-
-
-def adjacent_pos(pos: Pos):
-    x, y = pos
-    return [(x-1, y), (x, y-1), (x, y+1), (x+1, y)]
-
-
-def next_move_to_target(playable, allies, enemies, pos: Pos):
-    free = playable & ~allies & ~enemies
-    enemy_ranges = all_target_range(playable, allies, enemies)
-    steps_away = reach_steps(free, pos)
-    reachable_ranges = enemy_ranges & (steps_away > -1)
-    if not reachable_ranges.any():
-        raise CannotMove()
-    idx, idy = np.nonzero(reachable_ranges)
-    target_tuples = np.concatenate((steps_away[idx, idy], idx, idy)).reshape(3, len(idx)).transpose()
-    dist, tx, ty = min(tuple(l) for l in target_tuples)
-    for nx, ny in adjacent_pos(pos):
-        if not free[nx, ny]:
-            continue
-        steps_from_next = reach_steps(free, (nx, ny), limit=dist-1)
-        if steps_from_next[tx, ty] == dist - 1:
-            return nx, ny
-
-
-def move(playable, allies: List[Soldier], enemies: List[Soldier], soldier: Soldier):
-    cur_adjacent = adjacent_pos(soldier.pos)
-    if any(s.pos in cur_adjacent for s in enemies):
-        return  # Already in range: don't move!
-
-    mat_allies = mat_from_soldiers(playable, allies)
-    mat_enemies = mat_from_soldiers(playable, enemies)
-
-    nx, ny = next_move_to_target(playable, mat_allies, mat_enemies, soldier.pos)
-    soldier.x = nx
-    soldier.y = ny
-
-
-def turn(playable, elves: List[Soldier], goblins: List[Soldier], soldier: Soldier):
-
-    is_elf = soldier in elves
-    allies, enemies = (elves, goblins) if is_elf else (goblins, elves)
-    if not enemies:
-        raise EndOfBattle
-    try:
-        move(playable, allies, enemies, soldier)
-    except CannotMove:
-        return  # End of turn
-
-    cur_adjacent = adjacent_pos(soldier.pos)
-    targets = [s for s in enemies if s.pos in cur_adjacent]
-    if not targets:
-        return
-
-    target = min(targets, key=lambda s: (s.health, s.x, s.y))
-    target.health -= soldier.attack
-    if target.health <= 0:  # Target down
-        enemies.remove(target)
-
-
-def play_round(playable, elves: List[Soldier], goblins: List[Soldier]):
-    order = list(sorted(elves + goblins, key=lambda s: s.pos))
-    for soldier in order:
-        if soldier.health <= 0:
-            continue
-        turn(playable, elves, goblins, soldier)
-
-
-def game(full_input: str):
-    playable, elves, goblins = parse_map(full_input)
-    rounds = 0
-    while True:
-        try:
-            play_round(playable, elves, goblins)
-        except EndOfBattle:
-            break
-        rounds += 1
-    return rounds, (elves if elves else goblins)
+    yield x-1, y
+    yield x, y-1
+    yield x, y+1
+    yield x+1, y
 
 
 def main(data: str):
-    rounds, winners = game(data)
-    score = sum(s.health for s in winners)
-    yield rounds * score
+    game = Game(data)
+    game.play()
+    yield game.score
