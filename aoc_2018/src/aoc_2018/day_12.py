@@ -1,58 +1,57 @@
-
-import numpy as np
-
-TEST = """
-initial state: #..#.#..##......###...###
-
-...## => #
-..#.. => #
-.#... => #
-.#.#. => #
-.#.## => #
-.##.. => #
-.#### => #
-#.#.# => #
-#.### => #
-##.#. => #
-##.## => #
-###.. => #
-###.# => #
-####. => #
-""".strip().splitlines()
+from typing import List
 
 
-def parse_input_vest(vect_str):
-    return np.array([1 if c == '#' else -1 for c in vect_str], dtype=int)
+def grow(filters: List[int], plants: int, generations: int):
+    this_gen = plants
+    offset = plants.bit_length()
+
+    def offset_incr(num):
+        return [0, 2, 1, 2][num & 3]
+
+    for i in range(generations):
+        next_gen = 0
+        prev_gen = this_gen
+        while this_gen & 15:
+            this_gen <<= 1
+        for n in range(this_gen.bit_length()):
+            next_gen += filters[(this_gen >> n) & 31] << n
+        if next_gen == prev_gen:
+            offset += offset_incr(next_gen) * (generations - i)
+            break
+        offset += offset_incr(next_gen)
+        this_gen = next_gen
+    return this_gen, offset
 
 
-def generation(filters, plants):
-    return np.array([
-        np.convolve(np.pad(plants, (4, 4), mode='constant', constant_values=-1),
-                    p_filter[::-1], mode='valid') == 5 for p_filter in filters
-    ]).sum(axis=0) * 2 - 1
+def parse_input(data: str):
+    _trans = str.maketrans("#.", "10")
 
+    def parse_plants(plants: str):
+        return int(plants.translate(_trans), base=2)
 
-def many_gens(filters, plants_ini, generations=20):
-    plants = plants_ini
-    for _ in range(generations):
-        plants = generation(filters, plants)
-    return plants
+    lines = data.splitlines()
+    ini_state = parse_plants(lines[0].rsplit(maxsplit=1)[1])
 
-
-def parse_input(lines):
-    i_lines = iter(lines)
-    ini_state = parse_input_vest(next(i_lines)[15:])
-    next(i_lines)
-    filters = np.array([parse_input_vest(l[:5]) for l in i_lines if l.endswith(' => #')])
+    filters = [0] * 32
+    for line in lines[2:]:
+        if line.endswith(" => #"):
+            filters[parse_plants(line[:5])] = 1
     return filters, ini_state
 
 
-def as_str(plants):
-    has_plants = np.trim_zeros(plants == 1)
-    return ''.join(map(['.', '#'].__getitem__, has_plants))
+def print_plants(plants: int):
+    binary = bin(plants)[2:]
+    return binary.replace("1", "#").replace("0", ".").rstrip(".")
 
 
-def main(data: str, generations=20):
-    filters, plants = parse_input(data.splitlines())
-    res = (many_gens(filters, plants, generations) + 1) // 2
-    yield (res * (np.arange(len(res)) - 2 * generations)).sum()
+def count_plants(plants: int, offset: int):
+    while not plants & 1:
+        plants >>= 1
+    indices = range(offset - plants.bit_length(), offset)
+    return sum(n for p, n in zip(bin(plants)[2:], indices) if p == "1")
+
+
+def main(data: str):
+    filters, plants = parse_input(data)
+    yield count_plants(*grow(filters, plants, 20))
+    yield count_plants(*grow(filters, plants, 50_000_000_000))
