@@ -54,8 +54,10 @@ class Game:
     @property
     def ordered_players(self):
         players = self.players
-        ids = range(len(players))
-        ids = sorted(ids, key=lambda i: players[i].pos)
+        ids = sorted(
+            (i for i in range(len(players)) if players[i].health > 0),
+            key=lambda i: players[i].pos,
+        )
         return list(ids)
 
     @property
@@ -155,10 +157,12 @@ class Game:
             round_order = self.ordered_players
             for player_id in round_order:
                 if self.complete:
-                    return
+                    return True
                 if self.players[player_id].health <= 0:
                     continue
-                self.play_turn(player_id, allow_elf_death)
+                res = self.play_turn(player_id, allow_elf_death)
+                if not allow_elf_death and not res:
+                    return False
             self.rounds += 1
 
 
@@ -179,7 +183,35 @@ def neighbors(pos: Tuple[int, int]):
     yield x+1, y
 
 
+def optimize_elf_attack(data: str):
+    def try_value(atk_val: int):
+        game = Game(data, elf_atk=atk_val)
+        return game.play(allow_elf_death=False)
+
+    if try_value(3):
+        return 3
+
+    max_fail, min_pass = 3, 6
+    while not try_value(min_pass):
+        max_fail = min_pass
+        min_pass *= 2
+
+    while min_pass - max_fail > 1:
+        pivot = (max_fail + min_pass) // 2
+        if try_value(pivot):
+            min_pass = pivot
+        else:
+            max_fail = pivot
+
+    return min_pass
+
+
 def main(data: str):
     game = Game(data)
+    game.play()
+    yield game.score
+
+    elf_attack = optimize_elf_attack(data)
+    game = Game(data, elf_attack)
     game.play()
     yield game.score

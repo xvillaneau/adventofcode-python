@@ -1,5 +1,5 @@
 import pytest
-from aoc_2018.day_15 import Game
+from aoc_2018.day_15 import Game, optimize_elf_attack
 
 TEST_1 = """
 #######
@@ -88,6 +88,24 @@ RESULTS = [
 @pytest.mark.parametrize("start,rounds,outcome", RESULTS)
 def test_game(start, rounds, outcome):
     game = Game(start)
+    game.play()
+    assert game.rounds == rounds
+    assert game.score == outcome
+
+
+P2_RESULTS = [
+    (TEST_1, 15, 29, 4988),
+    (TEST_3, 4, 33, 31284),
+    (TEST_4, 15, 37, 3478),
+    (TEST_5, 12, 39, 6474),
+    (TEST_6, 34, 30, 1140),
+]
+
+
+@pytest.mark.parametrize("start,attack,rounds,outcome", P2_RESULTS)
+def test_optimize_attack(start, attack, rounds, outcome):
+    assert optimize_elf_attack(start) == attack
+    game = Game(start, attack)
     game.play()
     assert game.rounds == rounds
     assert game.score == outcome
