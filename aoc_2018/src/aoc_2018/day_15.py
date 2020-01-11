@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 from heapq import heappop, heappush
-from typing import Tuple, List
+from typing import Tuple
+from functools import lru_cache
 
 import numpy as np
-from scipy import ndimage
 
 from libaoc.matrix import load_string_matrix
 
@@ -30,28 +30,52 @@ class Player:
 class Game:
     def __init__(self, map_str, elf_atk=3):
         chars_mat = load_string_matrix(map_str)
-        self.playable = chars_mat != '#'
+        self.playable: np.ndarray = chars_mat != '#'
         self.rounds = 0
 
         elves = [Player(x, y, ELF, elf_atk) for x, y in np.argwhere(chars_mat == 'E')]
         goblins = [Player(x, y, GOBLIN) for x, y in np.argwhere(chars_mat == 'G')]
         self.players = elves + goblins
-        self._goblin_id = len(elves)
+        self._clans_pivot = len(elves)
+
+        self.elves, self.goblins = elves, goblins
+        # Cached values
         self._n_elves, self._n_goblins = len(elves), len(goblins)
+        self._elf_ranges, self._goblin_ranges = set(), set()
+        self._elves_pos, self._goblins_pos = set(), set()
+        self._refresh_elves()
+        self._refresh_goblins()
 
-    @property
-    def elves(self):
-        return [p for p in self.players[:self._goblin_id] if p.health > 0]
+    def _kill_elf(self, elf: Player):
+        self._n_elves -= 1
+        self.elves.remove(elf)
+        self._refresh_elves()
 
-    @property
-    def goblins(self):
-        return [p for p in self.players[self._goblin_id:] if p.health > 0]
+    def _kill_goblin(self, goblin: Player):
+        self._n_goblins -= 1
+        self.goblins.remove(goblin)
+        self._refresh_goblins()
+
+    def _refresh_elves(self):
+        pos, ranges = self._elves_pos, self._elf_ranges
+        pos.clear()
+        ranges.clear()
+        for elf in self.elves:
+            pos.add(elf.pos)
+            ranges.update(neighbors(elf.pos))
+
+    def _refresh_goblins(self):
+        pos, ranges = self._goblins_pos, self._goblin_ranges
+        pos.clear()
+        ranges.clear()
+        for goblin in self.goblins:
+            pos.add(goblin.pos)
+            ranges.update(neighbors(goblin.pos))
 
     @property
     def score(self):
         return self.rounds * sum(p.health for p in self.players if p.health > 0)
 
-    @property
     def ordered_players(self):
         players = self.players
         ids = sorted(
@@ -64,29 +88,27 @@ class Game:
     def complete(self):
         return self._n_elves == 0 or self._n_goblins == 0
 
-    def elves_mat(self):
-        return player_map(self.playable.shape, self.elves)
-
-    def goblins_mat(self):
-        return player_map(self.playable.shape, self.goblins)
-
-    def show_state(self, health=False):
-        indices = ~self.playable * 1 + self.elves_mat() * 2 + self.goblins_mat() * 3
+    def show_state(self, print_health=False):
+        indices = ~self.playable * 1
+        for elf in self.elves:
+            indices[elf.pos] = 2
+        for goblin in self.goblins:
+            indices[goblin.pos] = 3
         full_map = np.choose(indices, ('.', '#', 'E', 'G'))
-        if not health:
-            lines = (''.join(line) for line in full_map)
-        else:
-            lines = []
-            for x, line in enumerate(full_map):
-                line = "".join(line)
+
+        lines = []
+        for x, line in enumerate(full_map):
+            line = "".join(line)
+            if print_health:
                 on_line = [p for p in self.players if p.x == x]
                 on_line.sort(key=lambda p: p.y)
-                players = ", ".join(
+                line += "   " + ", ".join(
                     f"{p.clan[0].upper()}({p.health})"
                     for p in on_line
                     if p.health > 0
                 )
-                lines.append(line + "   " + players)
+            lines.append(line)
+
         return "\n".join(lines)
 
     def __str__(self):
@@ -98,28 +120,25 @@ class Game:
         if player.health <= 0:
             return player.pos
 
-        goblins, elves = self.goblins_mat(), self.elves_mat()
-        enemies = goblins if player.clan == ELF else elves
+        ranges = self._goblin_ranges if player.clan == ELF else self._elf_ranges
 
         start_pos = player.pos
-        attack_ranges = ndimage.binary_dilation(enemies)
-        if attack_ranges[start_pos]:
+        if start_pos in ranges:
             return start_pos
 
-        free = self.playable & ~goblins & ~elves
-        frontier, visited = [], set()
-        for first_step in neighbors(start_pos):
-            if not free[first_step]:
+        frontier, visited = [], self._goblins_pos | self._elves_pos
+        for pos in neighbors(start_pos):
+            if pos in visited or not self.playable[pos]:
                 continue
-            heappush(frontier, (1, first_step, first_step))
-            visited.add(first_step)
+            heappush(frontier, (1, pos, pos))
+            visited.add(pos)
 
         while frontier:
             steps, first_pos, pos = heappop(frontier)
-            if attack_ranges[pos]:
+            if pos in ranges:
                 return first_pos
             for next_pos in neighbors(pos):
-                if next_pos in visited or not free[next_pos]:
+                if next_pos in visited or not self.playable[next_pos]:
                     continue
                 visited.add(next_pos)
                 heappush(frontier, (steps + 1, first_pos, next_pos))
@@ -130,7 +149,12 @@ class Game:
         player = self.players[player_id]
         next_move = self.next_move(player_id)
 
-        player.move(next_move)
+        if next_move != player.pos:
+            player.move(next_move)
+            if player.clan == ELF:
+                self._refresh_elves()
+            else:
+                self._refresh_goblins()
 
         enemies = self.goblins if player.clan == ELF else self.elves
         adjacent_pos = set(neighbors(player.pos))
@@ -146,16 +170,15 @@ class Game:
             if target.clan == ELF:
                 if not allow_elf_death:
                     return False
-                self._n_elves -= 1
+                self._kill_elf(target)
             else:
-                self._n_goblins -= 1
+                self._kill_goblin(target)
 
         return True
 
     def play(self, allow_elf_death=True):
         while True:
-            round_order = self.ordered_players
-            for player_id in round_order:
+            for player_id in self.ordered_players():
                 if self.complete:
                     return True
                 if self.players[player_id].health <= 0:
@@ -166,44 +189,35 @@ class Game:
             self.rounds += 1
 
 
-def player_map(shape, players: List[Player]):
-    pos_ind = np.array([p.pos for p in players]).transpose()
-    if not np.any(pos_ind):
-        return np.full(shape, False)
-    int_ind = np.ravel_multi_index(pos_ind, shape)
-    np.put(mat := np.full(shape, False), int_ind, True)
-    return mat
-
-
+@lru_cache(maxsize=512)
 def neighbors(pos: Tuple[int, int]):
     x, y = pos
-    yield x-1, y
-    yield x, y-1
-    yield x, y+1
-    yield x+1, y
+    return [(x-1, y), (x, y-1), (x, y+1), (x+1, y)]
 
 
 def optimize_elf_attack(data: str):
     def try_value(atk_val: int):
         game = Game(data, elf_atk=atk_val)
-        return game.play(allow_elf_death=False)
+        return game.play(allow_elf_death=False), game.score
 
-    if try_value(3):
-        return 3
-
-    max_fail, min_pass = 3, 6
-    while not try_value(min_pass):
+    max_fail, min_pass = 2, 3
+    while True:
+        passed, opt_score = try_value(min_pass)
+        if passed:
+            break
         max_fail = min_pass
         min_pass *= 2
 
     while min_pass - max_fail > 1:
         pivot = (max_fail + min_pass) // 2
-        if try_value(pivot):
+        passed, score = try_value(pivot)
+        if passed:
             min_pass = pivot
+            opt_score = score
         else:
             max_fail = pivot
 
-    return min_pass
+    return min_pass, opt_score
 
 
 def main(data: str):
@@ -211,7 +225,4 @@ def main(data: str):
     game.play()
     yield game.score
 
-    elf_attack = optimize_elf_attack(data)
-    game = Game(data, elf_attack)
-    game.play()
-    yield game.score
+    yield optimize_elf_attack(data)[1]

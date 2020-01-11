@@ -94,18 +94,14 @@ def test_game(start, rounds, outcome):
 
 
 P2_RESULTS = [
-    (TEST_1, 15, 29, 4988),
-    (TEST_3, 4, 33, 31284),
-    (TEST_4, 15, 37, 3478),
-    (TEST_5, 12, 39, 6474),
-    (TEST_6, 34, 30, 1140),
+    (TEST_1, 15, 4988),
+    (TEST_3, 4, 31284),
+    (TEST_4, 15, 3478),
+    (TEST_5, 12, 6474),
+    (TEST_6, 34, 1140),
 ]
 
 
-@pytest.mark.parametrize("start,attack,rounds,outcome", P2_RESULTS)
-def test_optimize_attack(start, attack, rounds, outcome):
-    assert optimize_elf_attack(start) == attack
-    game = Game(start, attack)
-    game.play()
-    assert game.rounds == rounds
-    assert game.score == outcome
+@pytest.mark.parametrize("start,attack,outcome", P2_RESULTS)
+def test_optimize_attack(start, attack, outcome):
+    assert optimize_elf_attack(start) == (attack, outcome)
