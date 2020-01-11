@@ -1,6 +1,5 @@
-from dataclasses import dataclass
-from typing import List, Callable, Dict, Iterable, FrozenSet, Tuple, Set
-from parsimonious import Grammar
+import re
+from typing import List, Callable, Dict, Iterable, Tuple, Set, NamedTuple
 
 
 def add_register(reg_a, reg_b, reg_c, registers):
@@ -88,66 +87,51 @@ OPERATIONS: Dict[str, Operation] = {
 }
 
 
-@dataclass
-class RawOp:
+class RawOp(NamedTuple):
     op_num: int
     reg_a: int
     reg_b: int
     reg_c: int
 
 
-@dataclass
-class OpExample:
+class Example(NamedTuple):
     before: List[int]
     after: List[int]
     raw_op: RawOp
 
 
 def parse_input(full_input: str):
+    raw_examples, raw_program = full_input.split("\n\n\n\n")
 
-    input_grammar = Grammar("""
-    input        = example* instruction*
-    example      = before instruction after
-    before       = "Before: " state _
-    after        = "After:  " state _
-    instruction  = OPNUM _ VALUE _ VALUE _ VALUE _
-    state        = "[" VALUE ", " VALUE ", " VALUE ", " VALUE "]"
+    re_num = re.compile(r'\d+')
+    def extract_nums(string: str):
+        return list(map(int, re_num.findall(string)))
 
-    _     = ~"\s+"
-    VALUE = ~"[0-9]"
-    OPNUM = ~"[0-9]+"
-    """)
+    examples = []
+    for raw in raw_examples.split("\n\n"):
+        before, op, after = raw.splitlines()
+        examples.append(
+            Example(
+                extract_nums(before), extract_nums(after), RawOp(*extract_nums(op))
+            )
+        )
 
-    def _parse_state(state_tree):
-        return [int(state_tree.children[i].text) for i in (1, 3, 5, 7)]
-
-    def _parse_instruction(instruction_tree):
-        values = [int(instruction_tree.children[i].text) for i in (0, 2, 4, 6)]
-        return RawOp(*values)
-
-    def _parse_example(example_tree):
-        before = _parse_state(example_tree.children[0].children[1])
-        operation = _parse_instruction(example_tree.children[1])
-        after = _parse_state(example_tree.children[2].children[1])
-        return OpExample(before, after, operation)
-
-    tree = input_grammar.parse(full_input)
-    examples = [_parse_example(ex) for ex in tree.children[0].children]
-    program = [_parse_instruction(op) for op in tree.children[1].children]
+    program = [RawOp(*extract_nums(line)) for line in raw_program.splitlines()]
     return examples, program
 
 
-def try_example(example: OpExample):
+def try_example(example: Example):
+    before, after, (_, a, b, c) = example
 
     def _op_matches(op: Operation):
-        reg = example.before.copy()
-        op(example.raw_op.reg_a, example.raw_op.reg_b, example.raw_op.reg_c, reg)
-        return reg == example.after
+        reg = before.copy()
+        op(a, b, c, reg)
+        return reg == after
 
-    return frozenset(name for name, op in OPERATIONS.items() if _op_matches(op))
+    return tuple(name for name, op in OPERATIONS.items() if _op_matches(op))
 
 
-def match_opcodes(matches: Iterable[Tuple[int, FrozenSet[str]]]) -> List[Operation]:
+def match_opcodes(matches: Iterable[Tuple[int, Tuple[str]]]) -> List[Operation]:
     numbers = list(range(16))
     all_codes = set(OPERATIONS)
     tmp: Dict[int, Set[str]] = {num: all_codes.copy() for num in numbers}
@@ -168,8 +152,8 @@ def match_opcodes(matches: Iterable[Tuple[int, FrozenSet[str]]]) -> List[Operati
 
 def run_program(program: List[RawOp], op_array: List[Operation]):
     registers = [0, 0, 0, 0]
-    for op in program:
-        op_array[op.op_num](op.reg_a, op.reg_b, op.reg_c, registers)
+    for op, a, b, c in program:
+        op_array[op](a, b, c, registers)
     return registers
 
 
