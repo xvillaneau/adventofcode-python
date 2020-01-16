@@ -133,12 +133,7 @@ def virus_count_strong(infected: Grid, bursts: int) -> int:
     return count
 
 
-def day_22(lines: List[str]):
-    grid = read_map(lines)
+def day_22(data: str):
+    grid = read_map(data.splitlines())
     yield virus_count(grid, 10_000)
     yield virus_count_strong(grid, 10_000_000)
-
-
-if __name__ == '__main__':
-    from libaoc import iter_main, files
-    iter_main(2017, 22, files.read_lines, day_22)

@@ -34,6 +34,8 @@ def part_2(starts: Tuple[int, int]):
     return count_matches(generator_a_4, generator_b_8, 5_000_000)
 
 
-if __name__ == '__main__':
-    from libaoc import simple_main, static_input
-    simple_main(2017, 15, static_input((703, 516)), part_1, part_2)
+def main(data: str):
+    a, b = (int(line.rsplit(maxsplit=1)[1]) for line in data.splitlines())
+    # TODO: Optimize me!
+    yield part_1((a, b))
+    yield part_2((a, b))

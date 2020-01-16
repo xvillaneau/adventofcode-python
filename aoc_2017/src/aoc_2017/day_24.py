@@ -69,13 +69,8 @@ def strongest_bridge(components: Inventory) -> Tuple[Bridge, Bridge]:
     return strongest, longest
 
 
-def day_24(lines: List[str]):
-    bridges = read_components(lines)
+def main(data: str):
+    bridges = read_components(data.splitlines())
     b1, b2 = strongest_bridge(bridges)
     yield bridge_len(b1)
     yield bridge_len(b2)
-
-
-if __name__ == '__main__':
-    from libaoc import iter_main, files
-    iter_main(2017, 24, files.read_lines, day_24)

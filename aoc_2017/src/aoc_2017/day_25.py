@@ -99,12 +99,7 @@ def run(program: Program) -> Tape:
     return tape
 
 
-def run_tape(data):
+def main(data):
     program = read_program(data)
     tape = run(program)
-    return sum(tape.values())
-
-
-if __name__ == '__main__':
-    from libaoc import simple_main, files
-    simple_main(2017, 25, files.read_full, run_tape)
+    yield sum(tape.values())

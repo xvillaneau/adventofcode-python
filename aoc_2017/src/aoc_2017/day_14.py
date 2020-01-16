@@ -32,12 +32,7 @@ def num_regions(rows: Mem) -> int:
     return regions.max()
 
 
-def day_14(seed: str):
+def main(seed: str):
     puzzle = all_rows(seed)
     yield count_all_bits(puzzle)
     yield num_regions(puzzle)
-
-
-if __name__ == '__main__':
-    from libaoc import iter_main, static_input
-    iter_main(2017, 14, static_input("amgozmfv"), day_14)

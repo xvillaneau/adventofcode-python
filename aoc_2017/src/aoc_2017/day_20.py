@@ -99,13 +99,8 @@ def collision_engine(particles: List[Particle]) -> List[Particle]:
     return parts
 
 
-def day_20(lines: List[str]):
-    all_particles = read_file(lines)
+def main(data: str):
+    all_particles = read_file(data.splitlines())
     slow = slowest(all_particles)
     yield slow.index
     yield len(collision_engine(all_particles))
-
-
-if __name__ == '__main__':
-    from libaoc import iter_main, files
-    iter_main(2017, 20, files.read_lines, day_20)

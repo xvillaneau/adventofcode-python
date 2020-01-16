@@ -49,13 +49,8 @@ def max_distance(instructions: List[str]) -> float:
     return max(distance(v) for v in locations)
 
 
-def day_11(data: str):
+def main(data: str):
     lost_path = data.strip().split(",")
     lost_loc = group_instructions(lost_path)
     yield int(round(distance(lost_loc)))
     yield int(round(max_distance(lost_path)))
-
-
-if __name__ == '__main__':
-    from libaoc import iter_main, files
-    iter_main(2017, 11, files.read_full, day_11)

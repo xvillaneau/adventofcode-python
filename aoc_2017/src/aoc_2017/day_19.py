@@ -75,13 +75,8 @@ def follow_path(diagram: Diagram):
         count += 1
 
 
-def day_19(data: str):
+def main(data: str):
     follower = follow_path(data.splitlines())
     res = list(follower)
     yield ''.join(c for c, _ in res)
     yield max(i for _, i in res)
-
-
-if __name__ == '__main__':
-    from libaoc import iter_main, files
-    iter_main(2017, 19, files.read_full, day_19)

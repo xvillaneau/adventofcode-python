@@ -77,6 +77,6 @@ def billion_dances(instructions: str, programs: str = P_16, n=1_000_000_000):
     return programs
 
 
-if __name__ == '__main__':
-    from libaoc import simple_main, files
-    simple_main(2017, 16, files.read_full, dance, billion_dances)
+def main(data: str):
+    yield dance(data)
+    yield billion_dances(data)

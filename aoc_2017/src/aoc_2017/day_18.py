@@ -178,7 +178,8 @@ def run_duet(program: Program):
                 return count_snd_1
 
 
-def day_18(lines: List[str]):
+def main(data: str):
+    lines = data.splitlines()
     program = read_file(lines)
     try:
         run_single(program)
@@ -187,8 +188,3 @@ def day_18(lines: List[str]):
 
     dual_program = read_file(lines, duet=True)
     yield run_duet(dual_program)
-
-
-if __name__ == '__main__':
-    from libaoc import iter_main, files
-    iter_main(2017, 18, files.read_lines, day_18)

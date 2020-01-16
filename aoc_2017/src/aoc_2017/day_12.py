@@ -44,12 +44,7 @@ def all_groups(links: Links) -> List[Set[int]]:
     return groups
 
 
-def day_12(data: List[str]):
-    many_links = parse_input(data)
+def main(data: str):
+    many_links = parse_input(data.splitlines())
     yield len(explore_links(many_links, 0))
     yield len(all_groups(many_links))
-
-
-if __name__ == '__main__':
-    from libaoc import iter_main, files
-    iter_main(2017, 12, files.read_lines, day_12)

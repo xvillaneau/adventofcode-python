@@ -73,12 +73,7 @@ def solve_balance(weights, relations):
     return culprit, weights[culprit] + (correct_weight - culprit_weight)
 
 
-def day_07(process_dump: List[str]):
-    ws, rels = parse_file(process_dump)
+def main(data: str):
+    ws, rels = parse_file(data.splitlines())
     yield find_root(rels)
     yield solve_balance(ws, rels)[1]
-
-
-if __name__ == '__main__':
-    from libaoc import iter_main, files
-    iter_main(2017, 7, files.read_lines, day_07)

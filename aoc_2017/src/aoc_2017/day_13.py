@@ -36,12 +36,7 @@ def first_pass(filters: Filters):
         delay += 1
 
 
-def day_13(data: List[str]):
-    big_file = parse_file(data)
+def main(data: str):
+    big_file = parse_file(data.splitlines())
     yield severity(big_file)
     yield next(first_pass(big_file))
-
-
-if __name__ == '__main__':
-    from libaoc import iter_main, files
-    iter_main(2017, 13, files.read_lines, day_13)

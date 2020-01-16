@@ -126,13 +126,8 @@ def fractal_count_iter(rules: RuleSet, n: int) -> int:
     return pattern.mat.sum()
 
 
-def day_21(lines: List[str]):
-    rules = read_all_rules(lines)
+def main(data: str):
+    rules = read_all_rules(data.splitlines())
     yield fractal_count_iter(rules, 5)
     # TODO: This is SLOW
     yield fractal_count_iter(rules, 18)
-
-
-if __name__ == '__main__':
-    from libaoc import iter_main, files
-    iter_main(2017, 21, files.read_lines, day_21)

@@ -88,12 +88,7 @@ def prog_opt(debug=True):
     return sum(1 for b in range(b_ini, c + 1, 17) if f_test(b))
 
 
-def day_23(lines: List[str]):
-    program = read_program(lines)
+def main(data: str):
+    program = read_program(data.splitlines())
     yield run_program(program, debug=True)
     yield prog_opt(debug=False)
-
-
-if __name__ == '__main__':
-    from libaoc import iter_main, files
-    iter_main(2017, 23, files.read_lines, day_23)

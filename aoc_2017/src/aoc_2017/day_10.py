@@ -64,12 +64,8 @@ def full_hash(str_in: str):
     return hex_hash(dense_hash(sparse_hash(str_to_lengths(str_in))))
 
 
-def day_10(data: str):
+def main(data: str):
     instructions = [int(i) for i in data.split(',')]
     hashed, _, _ = twist_round(instructions, list(range(256)), 0, 0)
     yield hashed[0] * hashed[1]
     yield full_hash(data)
-
-if __name__ == '__main__':
-    from libaoc import iter_main, files
-    iter_main(2017, 10, files.read_full, day_10)

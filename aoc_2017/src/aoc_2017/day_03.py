@@ -48,6 +48,7 @@ def part_2(num: int):
     return next(i for i in spiral if i > num)
 
 
-if __name__ == '__main__':
-    from libaoc import static_input, simple_main
-    simple_main(2017, 3, static_input(368078), n_steps, part_2)
+def main(data: str):
+    num = int(data)
+    yield n_steps(num)
+    yield part_2(num)

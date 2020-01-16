@@ -1,5 +1,4 @@
 from itertools import permutations, combinations
-from typing import List
 
 
 def is_anagram(word1, word2):
@@ -21,11 +20,7 @@ def has_no_duplicates(phrase: str) -> bool:
     return len(words) == len(set(words))
 
 
-def day_04(phrases: List[str]):
+def main(data: str):
+    phrases = data.splitlines()
     yield sum(has_no_duplicates(p) for p in phrases)
     yield sum(has_no_anagrams(p) for p in phrases)
-
-
-if __name__ == '__main__':
-    from libaoc import iter_main, files
-    iter_main(2017, 4, files.read_lines, day_04)

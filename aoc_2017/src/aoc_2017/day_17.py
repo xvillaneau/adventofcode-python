@@ -37,6 +37,7 @@ def second_circular(step: int, lim: int = 50_000_000) -> int:
     return second
 
 
-if __name__ == '__main__':
-    from libaoc import static_input, simple_main
-    simple_main(2017, 17, static_input(312), next_circular, second_circular)
+def main(data: str):
+    step = int(data)
+    yield next_circular(step)
+    yield second_circular(step)

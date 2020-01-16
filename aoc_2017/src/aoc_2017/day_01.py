@@ -28,6 +28,7 @@ def captcha_2(number: int):
     return sum_couples(digits_to_couples(digits, len(digits) // 2))
 
 
-if __name__ == '__main__':
-    from libaoc import simple_main, files
-    simple_main(2017, 1, files.read_int, captcha, captcha_2)
+def main(data: str):
+    number = int(data)
+    yield captcha(number)
+    yield captcha_2(number)

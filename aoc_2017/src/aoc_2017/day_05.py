@@ -1,5 +1,7 @@
 from typing import List
 
+from libaoc.parsers import parse_integer_list
+
 
 def trampolines(instructions: List[int]):
     stack = instructions.copy()
@@ -27,6 +29,7 @@ def weird_trampolines(instructions: List[int]):
     return n
 
 
-if __name__ == '__main__':
-    from libaoc import simple_main, files
-    simple_main(2017, 5, files.read_int_list, trampolines, weird_trampolines)
+def main(data: str):
+    jumps = parse_integer_list(data)
+    yield trampolines(jumps)
+    yield weird_trampolines(jumps)

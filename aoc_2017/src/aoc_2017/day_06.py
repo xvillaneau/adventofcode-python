@@ -1,5 +1,7 @@
 from typing import List
 
+from libaoc.parsers import parse_integer_list
+
 Bank = List[int]
 
 
@@ -18,9 +20,9 @@ def rebalance(bank: Bank) -> Bank:
         for i, x in enumerate(bank)]
 
 
-def count_cycles(bank: Bank):
+def main(data: str):
 
-    mem = bank.copy()
+    mem = parse_integer_list(data)
     states = set([])
     cycles = 0
 
@@ -32,8 +34,3 @@ def count_cycles(bank: Bank):
         states.add(tuple(mem))
         mem = rebalance(mem)
         cycles += 1
-
-
-if __name__ == '__main__':
-    from libaoc import iter_main, files
-    iter_main(2017, 6, files.read_int_list, count_cycles)

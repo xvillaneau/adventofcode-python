@@ -44,6 +44,6 @@ def count_garbage(stream: str):
     return _count_garbage(tree)
 
 
-if __name__ == '__main__':
-    from libaoc import simple_main, files
-    simple_main(2017, 9, files.read_full, score, count_garbage)
+def main(data: str):
+    yield score(data)
+    yield count_garbage(data)

@@ -13,7 +13,8 @@ OPERATIONS = {'inc': int.__add__, 'dec': int.__sub__}
 
 
 def parse_line(line: str) -> Instruction:
-    return re.match(r"^([a-z]+ .*) if (.*)$", line).groups()
+    operation, condition = re.match(r"^([a-z]+ .*) if (.*)$", line).groups()
+    return operation, condition
 
 
 def parse_file(lines: List[str]) -> List[Instruction]:
@@ -30,8 +31,8 @@ def apply_operation(registers: Dict[str, int], instruction: str):
     registers[reg] = OPERATIONS[oper](registers[reg], int(val))
 
 
-def run_program(program: List[str]) -> Tuple[int, int]:
-    instructions = parse_file(program)
+def main(data: str):
+    instructions = parse_file(data.splitlines())
 
     registers = defaultdict(int)
     highest = 0
@@ -42,9 +43,5 @@ def run_program(program: List[str]) -> Tuple[int, int]:
             reg = operation.split()[0]
             highest = max(highest, registers[reg])
 
-    return max(registers.values()), highest
-
-
-if __name__ == '__main__':
-    from libaoc import tuple_main, files
-    tuple_main(2017, 8, files.read_lines, run_program)
+    yield max(registers.values())
+    yield highest
