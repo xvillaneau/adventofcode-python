@@ -6,45 +6,40 @@ Program = List[Operation]
 ADDRESSES = {"a": 0, "b": 1, "c": 2, "d": 3}
 
 
-def parse_cpy(x, y) -> Operation:
-    y = ADDRESSES[y]
-
+def value_getter(arg):
     try:
-        x = int(x)
+        arg = int(arg)
 
     except ValueError:
-        x = ADDRESSES[x]
-
-        def cpy(registers: List[int]):
-            registers[y] = registers[x]
+        arg = ADDRESSES[arg]
+        def getter(registers):
+            return registers[arg]
 
     else:
+        def getter(_):
+            return arg
 
-        def cpy(registers: List[int]):
-            registers[y] = x
+    return getter
+
+
+def parse_cpy(x, y) -> Operation:
+    y = ADDRESSES[y]
+    get_x = value_getter(x)
+
+    def cpy(registers: List[int]):
+        registers[y] = get_x(registers)
 
     return cpy
 
 
 def parse_jnz(x, y) -> Operation:
-    y = int(y)
+    get_x = value_getter(x)
+    get_y = value_getter(y)
 
-    try:
-        x = int(x)
-
-    except ValueError:
-        x = ADDRESSES[x]
-
-        def jnz(registers: List[int]):
-            if registers[x] != 0:
-                return y
-            return 1
-
-    else:
-        jump = y if x else 1
-
-        def jnz(_):
-            return jump
+    def jnz(registers):
+        if get_x(registers) != 0:
+            return get_y(registers)
+        return 1
 
     return jnz
 
