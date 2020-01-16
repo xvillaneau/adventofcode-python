@@ -1,7 +1,5 @@
-
 from collections import Counter
 import re
-from libaoc import files, simple_main
 
 RE_LINE = re.compile(r'^([a-z-]+)-([0-9]+)\[([a-z]+)\]$')
 
@@ -46,5 +44,7 @@ def decrypt_names(lines):
     return [(n, i) for n, i in rooms if 'north' in n]
 
 
-if __name__ == '__main__':
-    simple_main(2016, 4, files.read_lines, sum_score, decrypt_names)
+def main(data: str):
+    lines = data.splitlines()
+    yield sum_score(lines)
+    yield decrypt_names(lines)

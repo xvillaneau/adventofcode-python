@@ -46,6 +46,6 @@ def exhaust_maze(seed: str):
     raise RuntimeError("No solution found!")
 
 
-if __name__ == '__main__':
-    from libaoc import simple_main, static_input
-    simple_main(2016, 17, static_input("yjjvjgan"), navigate_maze, exhaust_maze)
+def main(data: str):
+    yield navigate_maze(data)
+    yield exhaust_maze(data)

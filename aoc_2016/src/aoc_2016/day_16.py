@@ -60,6 +60,7 @@ def _slice_checksum(data_slice: str):
 
 
 def compute_checksum(start_data: str, disk_size: int, slice_min=10):
+    # TODO: This is broken, fix me!
     depth = factors_of_2(disk_size)
     slice_size = min(1 << slice_min, 1 << depth)
     n_slices = disk_size // slice_size
@@ -80,10 +81,6 @@ def compute_checksum(start_data: str, disk_size: int, slice_min=10):
     return checksum
 
 
-if __name__ == '__main__':
-    from functools import partial
-    from libaoc import simple_main, static_input
-    _input = static_input("10111011111001111")
-    part_1 = partial(compute_checksum, disk_size=272)
-    part_2 = partial(compute_checksum, disk_size=35651584)
-    simple_main(2016, 16, _input, part_1, part_2)
+def main(data: str):
+    yield compute_checksum(data.strip(), 272)
+    yield compute_checksum(data.strip(), 35651584)

@@ -21,8 +21,7 @@ def still_not_white_elephant(n: int):
         elves.rotate(-1)
     return elves[0]
 
-if __name__ == '__main__':
-    from libaoc import static_input, simple_main
-    simple_main(
-        2015, 19, static_input(3001330), not_white_elephant, still_not_white_elephant
-    )
+def main(data: str):
+    num = int(data)
+    yield not_white_elephant(num)
+    yield still_not_white_elephant(num)

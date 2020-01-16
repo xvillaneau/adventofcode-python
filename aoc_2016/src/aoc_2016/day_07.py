@@ -1,8 +1,6 @@
-
 from itertools import islice
 import re
 from typing import List, Tuple
-from libaoc import files, simple_main
 
 RE_ADDR = re.compile(r'([a-z]+)(?:\[([a-z]+)\])?')
 
@@ -59,5 +57,7 @@ def count_ssl(lines):
     return sum(map(has_ssl, lines))
 
 
-if __name__ == '__main__':
-    simple_main(2016, 7, files.read_lines, count_tls, count_ssl)
+def main(data: str):
+    lines = data.splitlines()
+    yield count_tls(lines)
+    yield count_ssl(lines)

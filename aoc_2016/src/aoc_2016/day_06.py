@@ -1,7 +1,5 @@
-
 from collections import Counter
 from typing import List
-from libaoc import files, simple_main
 
 
 def letter_counters(words: List[str]):
@@ -26,5 +24,7 @@ def least_common_letters(words):
     return ''.join(_least_common(c) for c in letter_counters(words))
 
 
-if __name__ == '__main__':
-    simple_main(2016, 6, files.read_lines, repeated_letters, least_common_letters)
+def main(data: str):
+    lines = data.splitlines()
+    yield repeated_letters(lines)
+    yield least_common_letters(lines)

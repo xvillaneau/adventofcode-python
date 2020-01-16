@@ -1,7 +1,5 @@
-
 from typing import List, Callable
 
-from libaoc import simple_main, files
 from libaoc.vectors import Vect2D, Direction
 
 
@@ -20,7 +18,7 @@ def apply_line(line: str, start: Vect2D, check: Callable[[Vect2D], bool]):
 
     for char in line:
         prev_pos = pos
-        pos += MOVES[char]
+        pos += MOVES[char].vector
         if not check(pos):
             pos = prev_pos
 
@@ -32,8 +30,8 @@ def get_code(lines: List[str], start: Vect2D,
              conv: Callable[[Vect2D], str]):
     code = []
     pos = start
-    for l in lines:
-        pos = apply_line(l, pos, check)
+    for line in lines:
+        pos = apply_line(line, pos, check)
         code.append(conv(pos))
     return ''.join(code)
 
@@ -76,5 +74,7 @@ def get_weird_code(lines: List[str]):
     return get_code(lines, Vect2D(-2, 0), is_weirdpad, conv_weirdpad)
 
 
-if __name__ == '__main__':
-    simple_main(2016, 2, files.read_lines, get_num_code, get_weird_code)
+def main(data: str):
+    lines = data.splitlines()
+    yield get_num_code(lines)
+    yield get_weird_code(lines)

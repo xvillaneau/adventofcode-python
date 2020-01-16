@@ -1,4 +1,3 @@
-
 from dataclasses import dataclass
 from itertools import combinations
 from typing import FrozenSet, Set, Tuple
@@ -120,9 +119,7 @@ DAY11_2_START = LabState(1, frozenset([
     Equipment('ruthenium', 2, 3), Equipment('plutonium', 2, 3),
     Equipment('elerium', 1, 1), Equipment('dilithium', 1, 1)]))
 
-if __name__ == '__main__':
-    # from libaoc.algo import least_steps
-    from libaoc.algo import least_steps_both_ends
 
-    # print(least_steps(TEST_START, LabState.next_states, LabState.is_final))
-    print(least_steps_both_ends(DAY11_2_START, DAY11_2_START.final(), LabState.next_states))
+def main(_: str):
+    # TODO: Make this massively faster
+    yield "TOO SLOW, MAKE ME FASTER!"

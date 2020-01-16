@@ -1,6 +1,4 @@
-
 import re
-from libaoc import files, simple_main
 
 RE_TAG = re.compile(r'([A-Zx\d)]*)\((\d+)x(\d+)\)')
 
@@ -44,5 +42,6 @@ def decompressed_length_v2(buffer):
     return out_len
 
 
-if __name__ == '__main__':
-    simple_main(2016, 9, files.read_full, decompressed_length, decompressed_length_v2)
+def main(data: str):
+    yield decompressed_length(data)
+    yield decompressed_length_v2(data)

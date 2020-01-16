@@ -2,7 +2,7 @@ from itertools import combinations
 import re
 from typing import NamedTuple, Dict, Generator, Tuple
 
-from libaoc.vectors import Vect2D, UP, LEFT, DOWN, RIGHT
+from libaoc.vectors import Vect2D
 
 RE_NODE = re.compile(r"/dev/grid/node-x(\d+)-y(\d+)\s+(\d+)T\s+(\d+)T\s+(\d+)T")
 
@@ -44,12 +44,7 @@ def viable_pairs(
             yield node_b, node_a
 
 
-def day_20(df_output):
-    nodes = parse_nodes(df_output)
+def main(data: str):
+    nodes = parse_nodes(data.splitlines())
     yield sum(1 for _ in viable_pairs(nodes))
-    yield None
-
-
-if __name__ == '__main__':
-    from libaoc import iter_main, files
-    iter_main(2016, 22, files.read_lines, day_20)
+    # TODO: Solve part 2 automatically

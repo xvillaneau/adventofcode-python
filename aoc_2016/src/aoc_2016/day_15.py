@@ -52,6 +52,8 @@ def find_second_align(discs: List[str]):
     )
 
 
-if __name__ == '__main__':
-    from libaoc import simple_main, files
-    simple_main(2016, 15, files.read_lines, find_first_align, find_second_align)
+def main(data: str):
+    # TODO: Use Extended Euclidean Algorithm?
+    lines = data.splitlines()
+    yield find_first_align(lines)
+    yield find_second_align(lines)

@@ -1,8 +1,7 @@
-
 from functools import partial
 import re
+
 import numpy as np
-from libaoc import simple_main, files
 
 SCREEN_H = 6
 SCREEN_W = 50
@@ -61,9 +60,11 @@ def count_pixels(lines):
 
 def print_screen(lines, w=SCREEN_W, h=SCREEN_H):
     screen = run(lines, w, h)
-    for l in screen:
-        print(''.join(map(lambda i: '#' if i else ' ', l)))
+    for line in screen:
+        print(''.join(map(lambda i: '#' if i else ' ', line)))
 
 
-if __name__ == '__main__':
-    simple_main(2016, 8, files.read_lines, count_pixels, print_screen)
+def main(data: str):
+    lines = data.splitlines()
+    yield count_pixels(lines)
+    yield print_screen(lines)

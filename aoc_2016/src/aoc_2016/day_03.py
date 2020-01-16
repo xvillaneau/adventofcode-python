@@ -1,6 +1,7 @@
 from typing import List
 import numpy as np
-from libaoc import simple_main, files
+
+from libaoc.parsers import parse_integer_table
 
 
 def triangle_possible(sides: List[int]):
@@ -18,5 +19,7 @@ def count_transpose(triangles):
     return count_possible(new_triangles)
 
 
-if __name__ == '__main__':
-    simple_main(2016, 3, files.read_int_table, count_possible, count_transpose)
+def main(data: str):
+    triangles = parse_integer_table(data)
+    yield count_possible(triangles)
+    yield count_transpose(triangles)

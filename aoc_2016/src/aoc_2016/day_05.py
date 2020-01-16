@@ -1,6 +1,4 @@
-
 from hashlib import md5
-from libaoc import simple_main, files
 
 
 def get_pass(word: str):
@@ -31,5 +29,6 @@ def get_pass_2(word: str):
     return ''.join(password)
 
 
-if __name__ == '__main__':
-    simple_main(2016, 5, files.read_full, get_pass, get_pass_2)
+def main(data: str):
+    yield get_pass(data)
+    yield get_pass_2(data)

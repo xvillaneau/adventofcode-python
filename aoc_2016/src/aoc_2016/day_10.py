@@ -1,11 +1,9 @@
-
 from collections import defaultdict
-from functools import partial
 from typing import Set, Union
-from parsimonious import Grammar
-from libaoc import simple_main, files
 
-GRAMMAR = Grammar("""
+from parsimonious import Grammar
+
+GRAMMAR = Grammar(r"""
 program      = instruction+
 instruction  = ( initial / decision ) _?
 initial      = "value " NUMBER " goes to " BOT
@@ -120,5 +118,6 @@ def mul_outputs(program_txt):
     return outputs[Output(0)].pop() * outputs[Output(1)].pop() * outputs[Output(2)].pop()
 
 
-if __name__ == '__main__':
-    simple_main(2016, 10, files.read_full, partial(find_handler, find_chips={17, 61}), mul_outputs)
+def main(data: str):
+    yield find_handler(data, {17, 61})
+    yield mul_outputs(data)

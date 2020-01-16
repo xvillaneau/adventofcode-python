@@ -76,8 +76,7 @@ def scramble(instructions, start="abcdefgh", reverse=False):
     return ''.join(string)
 
 
-if __name__ == '__main__':
-    from libaoc import simple_main, files
-    from functools import partial
-    part_2 = partial(scramble, reverse=True, start="fbgdceah")
-    simple_main(2016, 21, files.read_lines, scramble, part_2)
+def main(data: str):
+    lines = data.splitlines()
+    yield scramble(lines)
+    yield scramble(lines, start="fbgdceah", reverse=True)

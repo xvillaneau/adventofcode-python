@@ -1,5 +1,4 @@
 from collections import deque, defaultdict
-from functools import partial
 from hashlib import md5
 import re
 from typing import List, Dict, Deque, Tuple
@@ -63,6 +62,7 @@ def find_hashes(seed: bytes, n=64, stretches=0, debug=False):
     return valid_indices[n - 1]
 
 
-if __name__ == '__main__':
-    from libaoc import simple_main, static_input
-    simple_main(2016, 14, static_input(b'zpqevtbw'), find_hashes, partial(find_hashes, stretches=2016))
+def main(data: str):
+    seed = data.encode()
+    yield find_hashes(seed)
+    yield find_hashes(seed, stretches=2016)

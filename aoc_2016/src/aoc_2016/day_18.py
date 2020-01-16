@@ -1,5 +1,5 @@
 from collections.abc import Iterator
-from itertools import count, islice
+from itertools import islice
 
 TRAP_PARENTS = {"^^.", ".^^", "^..", "..^"}
 
@@ -29,13 +29,7 @@ def count_safe_tiles(first_row: str, depth=40):
     row_iter = Row(first_row)
     return sum(islice(row_iter, depth))
 
-if __name__ == '__main__':
-    from functools import partial
-    from libaoc import simple_main, files
-    simple_main(
-        2016,
-        18,
-        files.read_full,
-        count_safe_tiles,
-        partial(count_safe_tiles, depth=400_000),
-    )
+def main(data: str):
+    # TODO: Optimize me!
+    yield count_safe_tiles(data)
+    yield count_safe_tiles(data, depth=400_000)

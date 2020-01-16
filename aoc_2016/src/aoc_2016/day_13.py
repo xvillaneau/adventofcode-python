@@ -3,7 +3,8 @@ from functools import lru_cache, partial
 from math import dist
 from typing import NamedTuple
 
-from libaoc.algo import AStarSearch, Node
+from libaoc.algo import AStarSearch
+
 
 class Pos(NamedTuple):
     x: int
@@ -67,6 +68,8 @@ def count_reachable(offset: int, depth=50, start=Pos(1, 1)):
 
     return len(explored)
 
-if __name__ == '__main__':
-    from libaoc import simple_main, static_input
-    simple_main(2016, 13, static_input(1352), shortest_path, count_reachable)
+
+def main(data: str):
+    offset = int(data)
+    yield shortest_path(offset)
+    yield count_reachable(offset)

@@ -1,13 +1,10 @@
-
 from typing import List
 
-from libaoc import simple_main, files
 from libaoc.vectors import Walker2D, Direction, Instruction
 
 
-def read_instructions(year, day):
-    raw_data = files.read_full(year, day)
-    elems = raw_data.split(', ')
+def read_instructions(data: str):
+    elems = data.split(', ')
     out = []
 
     for elem in elems:
@@ -42,5 +39,7 @@ def calc_dist(walker: Walker2D):
     return sum(walker.pos)
 
 
-if __name__ == '__main__':
-    simple_main(2016, 1, read_instructions, walk_full, walk_first_visited)
+def main(data: str):
+    moves = read_instructions(data)
+    yield walk_full(moves)
+    yield walk_first_visited(moves)

@@ -18,15 +18,11 @@ def unblocked_addresses(data):
             yield address
             address += 1
 
-def day_20(data):
-    unblocked = unblocked_addresses(data)
+
+def main(data: str):
+    unblocked = unblocked_addresses(data.splitlines())
     yield next(unblocked)
     count = 1
     for _ in unblocked:
         count += 1
     yield count
-
-
-if __name__ == '__main__':
-    from libaoc import iter_main, files
-    iter_main(2016, 20, files.read_lines, day_20)
