@@ -7,7 +7,7 @@ State of the code by year:
 * **2015**: _Completed_. Done recently, so the code mostly good I think.
 * **2016**: In progress (almost there), some of it doesn't run well.
 * **2017**: _Completed_. Old code, lots of it definitely broken.
-* **2018**: Incomplete. Some broken code.
+* **2018**: _Completed_. Code in good state and should work.
 * **2019**: _Completed_ (except day 25). All the code works, currently in the process of cleaning it up.
 
 ## Acknowledgements
