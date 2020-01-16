@@ -5,6 +5,7 @@ example = [
     "Disc #2 has 2 positions; at time=0, it is at position 1.",
 ]
 
+
 def test_aligned_at():
     disc_1 = Disc.from_str(example[0])
     assert not disc_1.aligned_at(0)

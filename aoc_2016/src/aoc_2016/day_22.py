@@ -16,7 +16,7 @@ class StorageNode(NamedTuple):
     def avail(self):
         return self.size - self.used
 
-    def viable_with(self, other: 'StorageNode'):
+    def viable_with(self, other: "StorageNode"):
         if not self.used:
             return False
         if self.position == other.position:

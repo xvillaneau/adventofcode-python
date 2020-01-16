@@ -16,8 +16,10 @@ class Equipment:
     gen_floor: int
     chip_floor: int
 
-    def move(self, gen_move, chip_move) -> 'Equipment':
-        return Equipment(self.name, self.gen_floor + gen_move, self.chip_floor + chip_move)
+    def move(self, gen_move, chip_move) -> "Equipment":
+        return Equipment(
+            self.name, self.gen_floor + gen_move, self.chip_floor + chip_move
+        )
 
 
 @dataclass(frozen=True)
@@ -25,14 +27,20 @@ class LabState:
     elevator: int
     equipment: FrozenSet[Equipment]
 
-    def move(self, gen_move, chip_move, names) -> 'LabState':
+    def move(self, gen_move, chip_move, names) -> "LabState":
         """VERY DUMB FUNCTION! Hopefully your input is right"""
-        return LabState(self.elevator + (gen_move or chip_move), frozenset(
-            (eqp.move(gen_move, chip_move) if eqp.name in names else eqp)
-            for eqp in self.equipment))
+        return LabState(
+            self.elevator + (gen_move or chip_move),
+            frozenset(
+                (eqp.move(gen_move, chip_move) if eqp.name in names else eqp)
+                for eqp in self.equipment
+            ),
+        )
 
-    def final(self) -> 'LabState':
-        return LabState(4, frozenset(Equipment(eqp.name, 4, 4) for eqp in self.equipment))
+    def final(self) -> "LabState":
+        return LabState(
+            4, frozenset(Equipment(eqp.name, 4, 4) for eqp in self.equipment)
+        )
 
     def is_valid(self) -> bool:
         unsafe, lone_chips = set([]), set([])
@@ -47,7 +55,7 @@ class LabState:
     def is_final(self) -> bool:
         return all(eqp.chip_floor == eqp.gen_floor == 4 for eqp in self.equipment)
 
-    def next_states(self) -> Set['LabState']:
+    def next_states(self) -> Set["LabState"]:
         floor = self.elevator
         next_states = set(())
 
@@ -77,13 +85,15 @@ class LabState:
         def _repr_eqp(eqp: Equipment, floor: int):
             gen_str = "G" if eqp.gen_floor == floor else "."
             chip_str = "M" if eqp.chip_floor == floor else "."
-            return f'{gen_str} {chip_str}'
+            return f"{gen_str} {chip_str}"
 
-        floors = [f'F{n} {"E" if self.elevator == n else "."}  ' +
-                  '  '.join(_repr_eqp(e, n) for e in equipment)
-                  for n in range(4, 0, -1)]
+        floors = [
+            f'F{n} {"E" if self.elevator == n else "."}  '
+            + "  ".join(_repr_eqp(e, n) for e in equipment)
+            for n in range(4, 0, -1)
+        ]
 
-        return '\n'.join([header] + floors)
+        return "\n".join([header] + floors)
 
 
 @dataclass(frozen=True)
@@ -103,21 +113,48 @@ class IntState:
         nums = [i for t in eqp_tuples for i in t]
         assert all(0 <= i < 4 for i in nums)
         assert 0 <= floor < 4
-        eqp_num = sum(1 << (n+4*i) for i, n in enumerate(nums))
+        eqp_num = sum(1 << (n + 4 * i) for i, n in enumerate(nums))
         return IntState(floor, len(eqp_tuples), eqp_num)
 
 
-TEST_START = LabState(1, frozenset([Equipment('hydrogen', 2, 1), Equipment('lithium', 3, 1),
-                                    Equipment('calcium', 3, 3)]))
+TEST_START = LabState(
+    1,
+    frozenset(
+        [
+            Equipment("hydrogen", 2, 1),
+            Equipment("lithium", 3, 1),
+            Equipment("calcium", 3, 3),
+        ]
+    ),
+)
 
-DAY11_START = LabState(1, frozenset([
-    Equipment('promethium', 1, 1), Equipment('cobalt', 2, 3), Equipment('curium', 2, 3),
-    Equipment('ruthenium', 2, 3), Equipment('plutonium', 2, 3)]))
+DAY11_START = LabState(
+    1,
+    frozenset(
+        [
+            Equipment("promethium", 1, 1),
+            Equipment("cobalt", 2, 3),
+            Equipment("curium", 2, 3),
+            Equipment("ruthenium", 2, 3),
+            Equipment("plutonium", 2, 3),
+        ]
+    ),
+)
 
-DAY11_2_START = LabState(1, frozenset([
-    Equipment('promethium', 1, 1), Equipment('cobalt', 2, 3), Equipment('curium', 2, 3),
-    Equipment('ruthenium', 2, 3), Equipment('plutonium', 2, 3),
-    Equipment('elerium', 1, 1), Equipment('dilithium', 1, 1)]))
+DAY11_2_START = LabState(
+    1,
+    frozenset(
+        [
+            Equipment("promethium", 1, 1),
+            Equipment("cobalt", 2, 3),
+            Equipment("curium", 2, 3),
+            Equipment("ruthenium", 2, 3),
+            Equipment("plutonium", 2, 3),
+            Equipment("elerium", 1, 1),
+            Equipment("dilithium", 1, 1),
+        ]
+    ),
+)
 
 
 def main(_: str):

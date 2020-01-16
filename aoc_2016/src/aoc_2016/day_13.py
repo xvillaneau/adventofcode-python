@@ -10,7 +10,7 @@ class Pos(NamedTuple):
     x: int
     y: int
 
-    def __add__(self, other: 'Pos'):
+    def __add__(self, other: "Pos"):
         return Pos(self.x + other.x, self.y + other.y)
 
 
@@ -19,7 +19,7 @@ def is_wall(pos: Pos, offset: int) -> bool:
     x, y = pos
     if x < 0 or y < 0:
         return True
-    _sum = x*x + 3*x + 2*x*y + y + y*y + offset
+    _sum = x * x + 3 * x + 2 * x * y + y + y * y + offset
     bits = 0
     while _sum:
         bits += _sum & 1
@@ -29,6 +29,7 @@ def is_wall(pos: Pos, offset: int) -> bool:
 
 MOVES = [(0, 1), (1, 0), (0, -1), (-1, 0)]
 
+
 def successors(offset: int, pos: Pos):
     result = []
     for x, y in MOVES:
@@ -37,17 +38,16 @@ def successors(offset: int, pos: Pos):
             result.append(next_pos)
     return result
 
+
 def shortest_path(offset: int, end: Pos = Pos(31, 39), start: Pos = Pos(1, 1)):
     searcher = AStarSearch(
-        start,
-        end.__eq__,
-        partial(successors, offset),
-        partial(dist, end)
+        start, end.__eq__, partial(successors, offset), partial(dist, end)
     )
     result = searcher.search()
     if result is None:
         raise RuntimeError
     return len(result.path()) - 1
+
 
 def count_reachable(offset: int, depth=50, start=Pos(1, 1)):
     frontier = deque([(start, 0)])

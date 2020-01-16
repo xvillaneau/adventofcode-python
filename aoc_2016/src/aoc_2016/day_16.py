@@ -1,6 +1,7 @@
 from itertools import islice
 from functools import lru_cache
 
+
 def inverse(data: str):
     result = ""
     for char in reversed(data):
@@ -54,7 +55,7 @@ def _slice_checksum(data_slice: str):
     while len(data_slice) > 1:
         next_slice = ""
         for i in range(0, len(data_slice), 2):
-            next_slice += CHECKSUM_PAIRS[data_slice[i:i+2]]
+            next_slice += CHECKSUM_PAIRS[data_slice[i : i + 2]]
         data_slice = next_slice
     return data_slice
 
@@ -68,7 +69,7 @@ def compute_checksum(start_data: str, disk_size: int, slice_min=10):
     stack, indices = [""] * stack_size, list(range(stack_size))
     checksum, data_iter = "", dragon_iter(start_data)
     for _ in range(n_slices):
-        data_slice = ''.join(islice(data_iter, slice_size))
+        data_slice = "".join(islice(data_iter, slice_size))
         char = _slice_checksum(data_slice)
         for i in indices:
             if not stack[i]:

@@ -1,16 +1,16 @@
 import re
 
-RE_TAG = re.compile(r'([A-Zx\d)]*)\((\d+)x(\d+)\)')
+RE_TAG = re.compile(r"([A-Zx\d)]*)\((\d+)x(\d+)\)")
 
 
 def decompress_step(buffer: str):
     search = RE_TAG.search(buffer)
     if not search:
-        return buffer, ''
+        return buffer, ""
     pre_tag, length, times = search.groups()
-    next_buffer = buffer[search.end():]
-    decompressed = next_buffer[:int(length)] * int(times)
-    return pre_tag + decompressed, next_buffer[int(length):]
+    next_buffer = buffer[search.end() :]
+    decompressed = next_buffer[: int(length)] * int(times)
+    return pre_tag + decompressed, next_buffer[int(length) :]
 
 
 def decompressed_length(buffer):
@@ -32,7 +32,7 @@ def decompressed_length_v2(buffer):
             break
         pre_tag, s_length, s_times = search.groups()
         length, times = int(s_length), int(s_times)
-        buffer = buffer[search.end():]
+        buffer = buffer[search.end() :]
         out_len += len(pre_tag)
         if len(buffer) < length:
             raise ValueError(f"Recursive ain't working :/")

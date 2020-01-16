@@ -4,10 +4,10 @@ from libaoc.vectors import Vect2D, Direction
 
 
 MOVES = {
-    'U': Direction.Up,
-    'D': Direction.Down,
-    'L': Direction.Left,
-    'R': Direction.Right,
+    "U": Direction.Up,
+    "D": Direction.Down,
+    "L": Direction.Left,
+    "R": Direction.Right,
 }
 
 
@@ -25,15 +25,18 @@ def apply_line(line: str, start: Vect2D, check: Callable[[Vect2D], bool]):
     return pos
 
 
-def get_code(lines: List[str], start: Vect2D,
-             check: Callable[[Vect2D], bool],
-             conv: Callable[[Vect2D], str]):
+def get_code(
+    lines: List[str],
+    start: Vect2D,
+    check: Callable[[Vect2D], bool],
+    conv: Callable[[Vect2D], str],
+):
     code = []
     pos = start
     for line in lines:
         pos = apply_line(line, pos, check)
         code.append(conv(pos))
-    return ''.join(code)
+    return "".join(code)
 
 
 def is_numpad(vect: Vect2D):
@@ -46,24 +49,24 @@ def is_weirdpad(vect: Vect2D):
 
 def conv_numpad(vect: Vect2D):
     if not is_numpad(vect):
-        raise ValueError(f'{vect} is not a numpad position')
+        raise ValueError(f"{vect} is not a numpad position")
     return str(5 - 3 * vect.y + vect.x)
 
 
 def conv_weirdpad(vect: Vect2D):
     if not is_weirdpad(vect):
-        raise ValueError(f'{vect} is not a weirdpad position')
+        raise ValueError(f"{vect} is not a weirdpad position")
     x, y = vect
     if y == 2:
-        return '1'
+        return "1"
     elif y == 1:
         return str(x + 3)
     elif y == 0:
         return str(x + 7)
     elif y == -1:
-        return ['A', 'B', 'C'][x + 1]
+        return ["A", "B", "C"][x + 1]
     else:
-        return 'D'
+        return "D"
 
 
 def get_num_code(lines: List[str]):

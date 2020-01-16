@@ -1,7 +1,7 @@
 from collections import Counter
 import re
 
-RE_LINE = re.compile(r'^([a-z-]+)-([0-9]+)\[([a-z]+)\]$')
+RE_LINE = re.compile(r"^([a-z-]+)-([0-9]+)\[([a-z]+)\]$")
 
 
 def parse_line(line: str):
@@ -11,13 +11,14 @@ def parse_line(line: str):
 
 
 def checksum(name: str):
-
     def _count_key(t):
         l, c = t
         return c, -ord(l)
 
-    counts = sorted(Counter(name.replace('-', '')).most_common(), key=_count_key, reverse=True)
-    return ''.join(x for x, _ in counts[:5])
+    counts = sorted(
+        Counter(name.replace("-", "")).most_common(), key=_count_key, reverse=True
+    )
+    return "".join(x for x, _ in counts[:5])
 
 
 def real_rooms(lines):
@@ -26,13 +27,12 @@ def real_rooms(lines):
 
 
 def shift(name: str, num: int):
-
     def _shift(char):
-        if char == '-':
+        if char == "-":
             return " "
         return chr(97 + (ord(char) - 97 + num) % 26)
 
-    return ''.join(map(_shift, name))
+    return "".join(map(_shift, name))
 
 
 def sum_score(lines):
@@ -41,7 +41,7 @@ def sum_score(lines):
 
 def decrypt_names(lines):
     rooms = [(shift(name, nb), nb) for name, nb in real_rooms(lines)]
-    return [(n, i) for n, i in rooms if 'north' in n]
+    return [(n, i) for n, i in rooms if "north" in n]
 
 
 def main(data: str):

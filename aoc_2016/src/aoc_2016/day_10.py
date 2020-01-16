@@ -3,7 +3,8 @@ from typing import Set, Union
 
 from parsimonious import Grammar
 
-GRAMMAR = Grammar(r"""
+GRAMMAR = Grammar(
+    r"""
 program      = instruction+
 instruction  = ( initial / decision ) _?
 initial      = "value " NUMBER " goes to " BOT
@@ -14,7 +15,8 @@ _            = ~"\s+"
 BOT          = "bot " NUMBER
 OUTPUT       = "output " NUMBER
 NUMBER       = ~"[0-9]+"
-""")
+"""
+)
 
 TEST = """
 value 5 goes to bot 2
@@ -31,7 +33,7 @@ class NumThing:
         self.num = num
 
     def __repr__(self):
-        return f'{self.__class__.__name__}({self.num})'
+        return f"{self.__class__.__name__}({self.num})"
 
     def __eq__(self, other):
         if not isinstance(other, self.__class__):
@@ -65,20 +67,20 @@ def parse_program(text):
     def _receiver(node):
         sub_node = node.children[0]
         name = sub_node.expr_name
-        if name == 'BOT':
+        if name == "BOT":
             return _bot_num(sub_node)
-        elif name == 'OUTPUT':
+        elif name == "OUTPUT":
             return _output_num(sub_node)
         else:
             raise ValueError(f"Unknown node {name}")
 
     for child in tree.children:
         instruction = child.children[0].children[0]
-        if instruction.expr_name == 'initial':
+        if instruction.expr_name == "initial":
             value = int(instruction.children[1].text)
             bot = _bot_num(instruction.children[3])
             initial[bot].add(value)
-        elif instruction.expr_name == 'decision':
+        elif instruction.expr_name == "decision":
             bot = _bot_num(instruction.children[0])
             low = _receiver(instruction.children[2])
             high = _receiver(instruction.children[4])
@@ -115,7 +117,9 @@ def find_handler(program_text, find_chips: Set[int]):
 
 def mul_outputs(program_txt):
     outputs = find_handler(program_txt, find_chips=set([]))
-    return outputs[Output(0)].pop() * outputs[Output(1)].pop() * outputs[Output(2)].pop()
+    return (
+        outputs[Output(0)].pop() * outputs[Output(1)].pop() * outputs[Output(2)].pop()
+    )
 
 
 def main(data: str):

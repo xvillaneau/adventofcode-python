@@ -11,5 +11,6 @@ rotate based on position of letter b
 rotate based on position of letter d
 """.strip().splitlines()
 
+
 def test_scramble():
     assert scramble(example, "abcde") == "decab"

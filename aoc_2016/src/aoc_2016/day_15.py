@@ -7,13 +7,14 @@ RE_DISC = re.compile(
     r"Disc #(\d+) has (\d+) positions; at time=0, it is at position (\d+)."
 )
 
+
 class Disc(NamedTuple):
     num: int
     positions: int
     start: int
 
     @classmethod
-    def from_str(cls, disc_str: str) -> 'Disc':
+    def from_str(cls, disc_str: str) -> "Disc":
         match = RE_DISC.match(disc_str)
         return cls(*map(int, match.groups()))
 

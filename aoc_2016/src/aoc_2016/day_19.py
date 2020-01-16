@@ -1,11 +1,13 @@
 from collections import deque
 
+
 def not_white_elephant(n: int):
     elves = deque(range(1, n + 1))
     while len(elves) > 1:
         elves.rotate(-1)
         elves.popleft()
     return elves[0]
+
 
 def still_not_white_elephant(n: int):
     elves = deque(range(1, n + 1))
@@ -20,6 +22,7 @@ def still_not_white_elephant(n: int):
         elves.popleft()
         elves.rotate(-1)
     return elves[0]
+
 
 def main(data: str):
     num = int(data)

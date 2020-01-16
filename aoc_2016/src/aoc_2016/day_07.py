@@ -2,7 +2,7 @@ from itertools import islice
 import re
 from typing import List, Tuple
 
-RE_ADDR = re.compile(r'([a-z]+)(?:\[([a-z]+)\])?')
+RE_ADDR = re.compile(r"([a-z]+)(?:\[([a-z]+)\])?")
 
 
 def line_groups(line):
@@ -23,13 +23,15 @@ def window(seq, n=2):
 def abba_match(word: str):
     def _abba(a, b, c, d):
         return a != b and a == d and b == c
+
     return any(_abba(*chrs) for chrs in window(word, 4))
 
 
 def aba_matches(word: str):
     def _aba(a, b, c):
         return a != b and a == c
-    return {''.join(chrs) for chrs in window(word, 3) if _aba(*chrs)}
+
+    return {"".join(chrs) for chrs in window(word, 3) if _aba(*chrs)}
 
 
 def has_tls(line):

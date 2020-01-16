@@ -34,16 +34,16 @@ def rotate_based(x: str, string, reverse=False):
 
 def reverse_positions(x: int, y: int, string):
     ids = np.indices(string.shape)[0]
-    ids[x:y+1] = np.flip(ids[x:y+1])
+    ids[x : y + 1] = np.flip(ids[x : y + 1])
     return string[ids]
 
 
 def move_position(x: int, y: int, string):
     ids = np.indices(string.shape)[0]
     if y > x:
-        ids[x:y+1] = np.roll(ids[x:y+1], -1)
+        ids[x : y + 1] = np.roll(ids[x : y + 1], -1)
     elif y < x:
-        ids[y:x+1] = np.roll(ids[y:x+1], 1)
+        ids[y : x + 1] = np.roll(ids[y : x + 1], 1)
     else:
         return string
     return string[ids]
@@ -51,7 +51,7 @@ def move_position(x: int, y: int, string):
 
 def scramble(instructions, start="abcdefgh", reverse=False):
     string = np.array(list(start))
-    for line in instructions[::(-1 if reverse else 1)]:
+    for line in instructions[:: (-1 if reverse else 1)]:
         if m := re.match(r"swap position (\d) with position (\d)", line):
             x, y = m.groups()
             string = swap_pos(int(x), int(y), string)
@@ -73,7 +73,7 @@ def scramble(instructions, start="abcdefgh", reverse=False):
             string = move_position(int(x), int(y), string)
         else:
             raise ValueError(f"Unknown line: {line!r}")
-    return ''.join(string)
+    return "".join(string)
 
 
 def main(data: str):

@@ -4,7 +4,7 @@ from libaoc.vectors import Walker2D, Direction, Instruction
 
 
 def read_instructions(data: str):
-    elems = data.split(', ')
+    elems = data.split(", ")
     out = []
 
     for elem in elems:

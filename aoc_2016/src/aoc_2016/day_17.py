@@ -5,6 +5,7 @@ from typing import List, NamedTuple
 from libaoc.algo import BFSearch, HighestCostSearch
 from libaoc.vectors import Vect2D, UP, DOWN, LEFT, RIGHT
 
+
 class MazeState(NamedTuple):
     position: Vect2D
     path: str
@@ -13,11 +14,14 @@ class MazeState(NamedTuple):
 INITIAL = MazeState(Vect2D(0, 3), "")
 END = Vect2D(3, 0)
 
+
 def open_paths(seed: str, path: str) -> str:
     head = md5((seed + path).encode()).hexdigest()[:4]
-    return ''.join(door for door, c in zip("UDLR", head) if c in "bcdef")
+    return "".join(door for door, c in zip("UDLR", head) if c in "bcdef")
+
 
 DIRS = {"U": UP, "D": DOWN, "L": LEFT, "R": RIGHT}
+
 
 def next_states(seed: str, state: MazeState) -> List[MazeState]:
     res = []
@@ -28,8 +32,10 @@ def next_states(seed: str, state: MazeState) -> List[MazeState]:
         res.append(MazeState(pos, state.path + open_door))
     return res
 
+
 def at_end(state: MazeState):
     return state.position == END
+
 
 def navigate_maze(seed: str):
     solver = BFSearch(INITIAL, at_end, partial(next_states, seed))
@@ -37,6 +43,7 @@ def navigate_maze(seed: str):
     if result is not None:
         return result.state.path
     raise RuntimeError("No solution found!")
+
 
 def exhaust_maze(seed: str):
     solver = HighestCostSearch(INITIAL, at_end, partial(next_states, seed))

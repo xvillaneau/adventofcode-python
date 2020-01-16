@@ -1,10 +1,10 @@
-
 def parse_ranges(data):
     ranges = []
     for line in data:
-        start, stop = line.split('-')
+        start, stop = line.split("-")
         ranges.append(range(int(start), int(stop) + 1))
     return ranges
+
 
 def unblocked_addresses(data):
     ranges = parse_ranges(data)
