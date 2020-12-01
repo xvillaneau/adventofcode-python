@@ -20,7 +20,7 @@ Kudos to my colleagues too, off whom I like to bounce ideas.
 ## Disclaimer
 
 * _Most of this is not good code_. It is either undocumented, untested, full of assumptions, slow, or broken. Maybe all of the above.
-* I have years of experience writing Python but I am by no means an expert. I try to follow best practices and point out where I explicitly do not, but don't take my word for it.
+* I have years of experience writing Python. I try to follow best practices and point out where I explicitly do not.
 * I try to make my solutions run reasonably fast, at the very least not take more than several seconds. I have no reference for what's considered fast or slow, so any claim I make about code being optimized is potentially very very wrong.
 * I don't think my solutions are particularly exotic, but that's subjective. This is mostly "normal" Python.
 
