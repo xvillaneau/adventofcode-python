@@ -1,31 +1,51 @@
-from math import prod
-from typing import Dict, List, Set, Tuple
+from bisect import bisect_left
 
 from libaoc.parsers import parse_integer_list
 
+# Thanks to Michael Wilson Churvis for providing the initial double-
+# pointer solution that inspired this. My previous solution was nowhere
+# as fast as this version.
 
-def find_2020_sums(expenses: List[int]):
-    traversed_1: Set[int] = set()
-    traversed_2: Dict[int, Tuple[int, int]] = {}
-    prod_1, prod_2 = None, None
 
-    for entry in expenses:
-        complement = 2020 - entry
+def find_pair(expenses, val=2020, start=0):
+    """
+    Look for a pair of numbers in the input such that their sum is equal
+    to a given value. The input expenses MUST be a SORTED LIST. Return
+    the product of those values. A start index for the search can be
+    specified.
+    """
+    left = start
+    # Save some time by skipping all the right-side values that are too
+    # large for the smallest left-side value to work. Because the list
+    # is sorted, we can use binary search to get there fast.
+    right = bisect_left(expenses, val - expenses[left], lo=left)
 
-        if prod_1 is None and complement in traversed_1:
-            prod_1 = entry * complement
-        if prod_2 is None and complement in traversed_2:
-            prod_2 = entry * prod(traversed_2[complement])
-        if prod_1 is not None and prod_2 is not None:
-            break
+    while left < right:
+        v_left, v_right = expenses[left], expenses[right]
+        if v_left + v_right == val:
+            return v_left * v_right
+        elif v_left + v_right < val:
+            left += 1
+        else:
+            right -= 1
 
-        for other in traversed_1:
-            if other + entry < 2020:
-                traversed_2[other + entry] = (other, entry)
-        traversed_1.add(entry)
+    return 0
 
-    return prod_1, prod_2
+
+def find_triplet(expenses, val=2020):
+    """
+    Find a triplet of numbers of which the sum is a given value. Returns
+    the product of those numbers.
+    """
+    for i in range(len(expenses) - 2):
+        pair_prod = find_pair(expenses, val - expenses[i], i + 1)
+        if pair_prod > 0:
+            return expenses[i] * pair_prod
+
+    return 0
 
 
 def main(data: str):
-    yield from find_2020_sums(parse_integer_list(data))
+    expenses = sorted(parse_integer_list(data))
+    yield find_pair(expenses)
+    yield find_triplet(expenses)
