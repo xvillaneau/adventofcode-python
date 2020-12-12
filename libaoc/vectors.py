@@ -53,6 +53,12 @@ class Vect2D:
     def __lt__(self, other):
         return self.x + self.y < other.x + other.y
 
+    def rot_left(self):
+        return Vect2D(-self.y, self.x)
+
+    def rot_right(self):
+        return Vect2D(self.y, -self.x)
+
     def up(self):
         return self + UP
 
@@ -134,6 +140,6 @@ class StaticWalker:
     def rot_right(self):
         return StaticWalker(self.pos, self.direction.right)
 
-    def move(self, n_step: int = 1):
-        move = self.direction.vector * n_step
+    def move(self, n_step: int = 1, direction=None):
+        move = (direction or self.direction).vector * n_step
         return StaticWalker(self.pos + move, self.direction)
