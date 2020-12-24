@@ -19,6 +19,14 @@ class Vect2D:
             return self.x == other.x and self.y == other.y
         return NotImplemented
 
+    def __len__(self):
+        return 2
+
+    def __getitem__(self, item):
+        if item in (0, 1):
+            return [self.x, self.y][item]
+        raise KeyError(item)
+
     def __neg__(self):
         return self * -1
 
