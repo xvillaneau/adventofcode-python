@@ -18,3 +18,10 @@ def parse_integer_list(data: str, delimiter=None):
 def parse_integer_table(data: str, delimiter=None):
     lines = data.splitlines()
     return np.array([[int(i) for i in line.split(delimiter)] for line in lines])
+
+
+def parse_digit_matrix(data: str):
+    return np.array(
+        [list(map(int, line.strip())) for line in data.strip().splitlines()],
+        dtype=int,
+    )
