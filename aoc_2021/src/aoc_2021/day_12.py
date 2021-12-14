@@ -1,4 +1,3 @@
-from collections import Counter
 from functools import cached_property
 
 
@@ -36,18 +35,24 @@ def parse_map(data: str) -> dict[str, Room]:
     return rooms
 
 
-def find_paths(rooms: dict[str, Room], path: tuple[Room, ...] = ()):
-    if not path:
-        path = (rooms["start"],)
+def count_paths(rooms: dict[str, Room]) -> int:
 
-    head: Room = path[-1]
-    for room in head.neighbors:
-        if room.is_small and room in path:
-            continue
-        if room.name == "end":
-            yield (*path, room)
-        else:
-            yield from find_paths(rooms, (*path, room))
+    def _count(head: Room, visited: frozenset[Room]) -> int:
+        paths = 0
+        for room in head.neighbors:
+            if room.name == "start":
+                continue
+            elif room.name == "end":
+                paths += 1
+            elif room.is_small:
+                if room in visited:
+                    continue
+                paths += _count(room, visited | {room})
+            else:
+                paths += _count(room, visited)
+        return paths
+
+    return _count(rooms["start"], frozenset())
 
 
 def count_more_paths(rooms: dict[str, Room]) -> int:
@@ -57,16 +62,13 @@ def count_more_paths(rooms: dict[str, Room]) -> int:
         for room in head.neighbors:
             if room.name == "start":
                 continue
-            if room.is_small and has_double and room in visited:
-                continue
             if room.name == "end":
                 paths += 1
             elif room.is_small:
-                paths += _count(
-                    room,
-                    visited | {room},
-                    has_double or room in visited,
-                )
+                if has_double and room in visited:
+                    continue
+                next_double = has_double or room in visited
+                paths += _count(room, visited | {room}, next_double)
             else:
                 paths += _count(room, visited, has_double)
         return paths
@@ -76,5 +78,5 @@ def count_more_paths(rooms: dict[str, Room]) -> int:
 
 def main(data: str):
     rooms = parse_map(data)
-    yield sum(1 for _ in find_paths(rooms))
+    yield count_paths(rooms)
     yield count_more_paths(rooms)

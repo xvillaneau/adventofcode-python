@@ -1,6 +1,6 @@
 import pytest
 
-from aoc_2021.day_12 import parse_map, find_paths, count_more_paths
+from aoc_2021.day_12 import parse_map, count_paths, count_more_paths
 
 EXAMPLE_1 = """
 start-A
@@ -57,13 +57,12 @@ MORE_PATHS = [(EXAMPLE_1, 36), (EXAMPLE_2, 103), (EXAMPLE_3, 3509)]
 
 
 @pytest.mark.parametrize("data,n_paths", N_PATHS)
-def test_find_paths(data, n_paths):
+def test_count_paths(data, n_paths):
     rooms = parse_map(data)
-    paths = list(find_paths(rooms))
-    assert len(paths) == n_paths
+    assert count_paths(rooms) == n_paths
 
 
 @pytest.mark.parametrize("data,n_paths", MORE_PATHS)
-def test_find_more_paths(data, n_paths):
+def test_count_more_paths(data, n_paths):
     rooms = parse_map(data)
     assert count_more_paths(rooms) == n_paths
