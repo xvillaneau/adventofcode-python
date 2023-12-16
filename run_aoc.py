@@ -9,7 +9,7 @@ from time import perf_counter_ns, perf_counter
 if sys.version_info < (3, 8):
     raise RuntimeError("Only Python >= 3.8 is supported")
 
-YEARS = list(range(2015, 2022))  # Add more over time
+YEARS = list(range(2015, 2023))  # Add more over time
 AOC_ROOT = Path(__file__).parent
 
 
