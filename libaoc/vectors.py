@@ -128,6 +128,9 @@ class Walker2D:
     def move(self, n_steps: int = 1):
         self.pos += self.direction.vector * n_steps
 
+    def peek(self, n_steps: int = 1) -> Vect2D:
+        return self.pos + self.direction.vector * n_steps
+
     def do(self, instruction: Instruction):
         if instruction == Instruction.Left:
             self.rot_left()
