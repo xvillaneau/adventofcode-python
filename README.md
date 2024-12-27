@@ -9,7 +9,11 @@ State of the code by year:
 * **2017**: _Completed_. Old code, lots of it definitely broken.
 * **2018**: _Completed_. Code in good state and should work.
 * **2019**: _Completed_ (except day 25). All the code works, currently in the process of cleaning it up.
-* **2020**: _In Progress_.
+* **2020**: _Completed_
+* **2021**: _Completed_ (except day 24, I think I did that one on paper)
+* **2022**: _Catching Up_
+* **2023**: _Catching Up_
+* **2024**: _In progress_
 
 ## Acknowledgements
 
@@ -19,10 +23,7 @@ Kudos to my colleagues too, off whom I like to bounce ideas.
 
 ## Disclaimer
 
-* _Most of this is not good code_. It is either undocumented, untested, full of assumptions, slow, or broken. Maybe all of the above.
-* I have years of experience writing Python. I try to follow best practices and point out where I explicitly do not.
-* I try to make my solutions run reasonably fast, at the very least not take more than several seconds. I have no reference for what's considered fast or slow, so any claim I make about code being optimized is potentially very very wrong.
-* I don't think my solutions are particularly exotic, but that's subjective. This is mostly "normal" Python.
+These solutions are not the best or most creative; take inspiration from them at your own risk.
 
 ## The Good Stuff
 
@@ -33,7 +34,7 @@ What I _am_ trying to do correctly is to document and explain my solutions acces
 
 ## Requirements
 
-This code **requires Python 3.8** to run. Before you ask, yes I use the "Walrus" operator. No, I don't care if you hate it. And that's not the only 3.8 feature I use so deal with it.
+This code requires Python 3.11 to run. Maybe slightly older versions work too, I haven't tested.
 
 Other requirements:
 * [NumPy](https://numpy.org/) (known to work with 1.17)
