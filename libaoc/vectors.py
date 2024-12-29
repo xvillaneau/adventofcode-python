@@ -31,13 +31,13 @@ class Vect2D:
         return self * -1
 
     def __mul__(self, other: int):
-        return type(self)(self.x * other, self.y * other)
+        return Vect2D(self.x * other, self.y * other)
 
     def __rmul__(self, other: int):
         return self * other
 
     def __add__(self, other: 'Vect2D'):
-        return type(self)(self.x + other.x, self.y + other.y)
+        return Vect2D(self.x + other.x, self.y + other.y)
 
     def __sub__(self, other: 'Vect2D'):
         return self + (-other)
@@ -47,10 +47,10 @@ class Vect2D:
             return NotImplemented
         if self.x % other or self.y % other:
             raise ValueError("Can only divide a vector integrally")
-        return type(self)(self.x // other, self.y // other)
+        return Vect2D(self.x // other, self.y // other)
 
     def __invert__(self):
-        return type(self)(self.y, self.x)
+        return Vect2D(self.y, self.x)
 
     def __complex__(self):
         return self.x + self.y * 1j
